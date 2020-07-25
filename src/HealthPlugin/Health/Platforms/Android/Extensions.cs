@@ -1,5 +1,6 @@
 ﻿using System;
 using Android.Gms.Fitness.Data;
+using Android.Gms.Fitness.Result;
 
 namespace Plugin.Health
 {
@@ -29,7 +30,7 @@ namespace Plugin.Health
                     return new GoogleFitData
                     {
                         TypeIdentifier          = DataType.TypeHeartRateBpm,
-                        AggregateTypeIdentifier = null,
+                        AggregateTypeIdentifier = DataType.AggregateHeartRateSummary,
                         Unit                    = Field.FieldBpm,
                     };
                 default:

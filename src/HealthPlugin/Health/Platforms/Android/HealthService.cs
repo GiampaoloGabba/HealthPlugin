@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -98,38 +98,34 @@ namespace Plugin.Health
                               .SetTimeRange(startTime, endTime, TimeUnit.Milliseconds)
                               .EnableServerQueries();
 
-            if (AggregateType != AggregateType.None && googleFitData.AggregateTypeIdentifier != null)
+            if (AggregateTime != AggregateTime.None && googleFitData.AggregateTypeIdentifier != null)
             {
                 readBuilder.Aggregate(googleFitDataType, googleFitData.AggregateTypeIdentifier);
 
-                switch (AggregateType)
+                switch (AggregateTime)
                 {
-                    case AggregateType.Year:
+                    case AggregateTime.Year:
                         readBuilder.BucketByTime(365, TimeUnit.Days);
                         break;
 
-                    case AggregateType.Month:
+                    case AggregateTime.Month:
                         readBuilder.BucketByTime(31, TimeUnit.Days);
                         break;
 
-                    case AggregateType.Week:
+                    case AggregateTime.Week:
                         readBuilder.BucketByTime(7, TimeUnit.Days);
                         break;
 
-                    case AggregateType.Hour:
+                    case AggregateTime.Day:
+                        readBuilder.BucketByTime(1, TimeUnit.Days);
+                        break;
+
+                    case AggregateTime.Hour:
                         readBuilder.BucketByTime(1, TimeUnit.Hours);
                         break;
 
-                    case AggregateType.Minute:
+                    case AggregateTime.Minute:
                         readBuilder.BucketByTime(1, TimeUnit.Minutes);
-                        break;
-
-                    case AggregateType.Second:
-                        readBuilder.BucketByTime(1, TimeUnit.Seconds);
-                        break;
-
-                    default:
-                        readBuilder.BucketByTime(1, TimeUnit.Days);
                         break;
                 }
             }
@@ -179,6 +175,8 @@ namespace Plugin.Health
         {
             try
             {
+                //need to pass type of field
+                //return dataPoint.GetValue(Field.FieldAverage).AsFloat();
                 return dataPoint.GetValue(unit).AsFloat();
             }
             catch

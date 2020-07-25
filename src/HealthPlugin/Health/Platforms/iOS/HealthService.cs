@@ -10,16 +10,6 @@ namespace Plugin.Health
 {
     public class HealthService : BaseHealthService
     {
-        //TODO
-        //Aggiungere altri tipi
-        //
-        //VEDERE SU:
-        //https://github.com/cph-cachet/flutter-plugins/tree/master/packages/health
-        //https://github.com/krokyze/FitKit
-        //https://docs.microsoft.com/it-it/xamarin/ios/platform/healthkit
-        //https://github.com/jlmatus/Xamarin-Forms-HealthKit-steps
-        //https://www.devfright.com/how-to-use-the-hkstatisticscollectionquery/
-
         readonly HKHealthStore _healthStore;
 
         public HealthService()
@@ -85,39 +75,35 @@ namespace Plugin.Health
             var predicate = HKQuery.GetPredicateForSamples((NSDate) startDate, (NSDate) endDate, HKQueryOptions.StrictStartDate);
             var sortDescriptor = new[] {new NSSortDescriptor(HKSample.SortIdentifierEndDate, true)};
 
-            if (AggregateType != AggregateType.None)
+            if (AggregateTime != AggregateTime.None)
             {
                 var anchor   = NSCalendar.CurrentCalendar.DateBySettingsHour(0, 0, 0, NSDate.Now, NSCalendarOptions.None);
                 var interval = new NSDateComponents();
 
-                switch (AggregateType)
+                switch (AggregateTime)
                 {
-                    case AggregateType.Year:
+                    case AggregateTime.Year:
                         interval.Year = 1;
                         break;
 
-                    case AggregateType.Month:
+                    case AggregateTime.Month:
                         interval.Month = 1;
                         break;
 
-                    case AggregateType.Week:
+                    case AggregateTime.Week:
                         interval.Week = 1;
                         break;
 
-                    case AggregateType.Hour:
-                        interval.Hour = 1;
-                        break;
-
-                    case AggregateType.Minute:
-                        interval.Hour = 1;
-                        break;
-
-                    case AggregateType.Second:
-                        interval.Second = 1;
-                        break;
-
-                    default:
+                    case AggregateTime.Day:
                         interval.Day = 1;
+                        break;
+
+                    case AggregateTime.Hour:
+                        interval.Hour = 1;
+                        break;
+
+                    case AggregateTime.Minute:
+                        interval.Hour = 1;
                         break;
                 }
 

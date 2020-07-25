@@ -9,7 +9,7 @@ namespace Plugin.Health
     {
         protected DateTime StartDate = DateTime.Today;
         protected DateTime EndDate = DateTime.Now;
-        protected AggregateType AggregateType = AggregateType.None;
+        protected AggregateTime AggregateTime = AggregateTime.None;
 
         public abstract bool IsDataTypeAvailable(HealthDataType healthDataType);
 
@@ -48,9 +48,9 @@ namespace Plugin.Health
             return this;
         }
 
-        public IHealthService SetAggregateType(AggregateType aggregateType)
+        public IHealthService SetAggregateType(AggregateTime aggregateTime)
         {
-            AggregateType = aggregateType;
+            AggregateTime = aggregateTime;
             return this;
         }
 

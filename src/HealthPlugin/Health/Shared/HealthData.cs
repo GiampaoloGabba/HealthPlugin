@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Plugin.Health
 {
@@ -10,7 +10,8 @@ namespace Plugin.Health
         public bool       UserEntered { get; set; }
     }
 
-    public enum AggregateType
+
+    public enum AggregateTime
     {
         None,
         Year,

@@ -15,7 +15,7 @@ namespace Plugin.Health
 
         IHealthService SetEndDate(DateTime endDate);
 
-        IHealthService SetAggregateType(AggregateType aggregateType);
+        IHealthService SetAggregateType(AggregateTime aggregateTime);
 
         public Task<IEnumerable<HealthData>> FetchDataAsync(HealthDataType healthDataType);
 
