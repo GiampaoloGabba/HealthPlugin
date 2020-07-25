@@ -22,6 +22,15 @@ namespace Plugin.Health
         Minute
     }
 
+    public enum AggregateType
+    {
+        None,
+        CumulativeSum,
+        Average,
+        Min,
+        Max
+    }
+
     public enum HealthDataType
     {
         StepCount,

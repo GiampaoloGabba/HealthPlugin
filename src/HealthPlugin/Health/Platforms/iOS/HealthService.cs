@@ -50,11 +50,13 @@ namespace Plugin.Health
 
                 return true;
             }
-
             return false;
         }
 
-        public override async Task<IEnumerable<HealthData>> FetchDataAsync(HealthDataType healthDataType)
+        protected override Task<IEnumerable<HealthData>> QueryAsync(HealthDataType healthDataType,
+                                                                    AggregateType aggregateType,
+                                                                    AggregateTime aggregateTime,
+                                                                    DateTime startDate, DateTime endDate)
         {
             if (_healthStore == null || !HKHealthStore.IsHealthDataAvailable)
                 throw new NotSupportedException("HealthKit data is not available on this device");
@@ -64,23 +66,18 @@ namespace Plugin.Health
             if (!authorized)
                 throw new UnauthorizedAccessException($"Not enough permissions to request {healthDataType}");
 
-            return await QueryAsync(healthDataType, StartDate, EndDate);
-        }
-
-        Task<IEnumerable<HealthData>> QueryAsync(HealthDataType healthDataType, DateTime startDate, DateTime endDate)
-        {
-            var taskComplSrc = new TaskCompletionSource<IEnumerable<HealthData>>();
-            var healthKitType = healthDataType.ToHealthKit();
-            var quantityType = HKQuantityType.Create(healthKitType.TypeIdentifier);
-            var predicate = HKQuery.GetPredicateForSamples((NSDate) startDate, (NSDate) endDate, HKQueryOptions.StrictStartDate);
+            var taskComplSrc   = new TaskCompletionSource<IEnumerable<HealthData>>();
+            var healthKitType  = healthDataType.ToHealthKit();
+            var quantityType   = HKQuantityType.Create(healthKitType.TypeIdentifier);
+            var predicate      = HKQuery.GetPredicateForSamples((NSDate) startDate, (NSDate) endDate, HKQueryOptions.StrictStartDate);
             var sortDescriptor = new[] {new NSSortDescriptor(HKSample.SortIdentifierEndDate, true)};
 
-            if (AggregateTime != AggregateTime.None)
+            if (aggregateTime != AggregateTime.None)
             {
                 var anchor   = NSCalendar.CurrentCalendar.DateBySettingsHour(0, 0, 0, NSDate.Now, NSCalendarOptions.None);
                 var interval = new NSDateComponents();
 
-                switch (AggregateTime)
+                switch (aggregateTime)
                 {
                     case AggregateTime.Year:
                         interval.Year = 1;

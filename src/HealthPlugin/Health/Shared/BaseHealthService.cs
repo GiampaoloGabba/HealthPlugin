@@ -7,52 +7,54 @@ namespace Plugin.Health
 {
     public abstract class BaseHealthService : IHealthService
     {
-        protected DateTime StartDate = DateTime.Today;
-        protected DateTime EndDate = DateTime.Now;
-        protected AggregateTime AggregateTime = AggregateTime.None;
+        private readonly Dictionary<HealthDataType, AggregateType> _selectedDataTypes = new Dictionary<HealthDataType, AggregateType>();
+        private AggregateTime _aggregateTime = AggregateTime.None;
+        private DateTime _startDate = DateTime.Today;
+        private DateTime _endDate   = DateTime.Now;
 
         public abstract bool IsDataTypeAvailable(HealthDataType healthDataType);
 
         public abstract Task<bool> RequestPermissionAsync(params HealthDataType[] dataTypes);
 
-        public abstract Task<IEnumerable<HealthData>> FetchDataAsync(HealthDataType healthDataType);
-
-        public async Task<IReadOnlyDictionary<HealthDataType, IEnumerable<HealthData>>> FetchMultipleDataAsync(params HealthDataType[] dataTypes)
+        public async Task<IReadOnlyDictionary<HealthDataType, IEnumerable<HealthData>>> FetchDataAsync()
         {
             var dic = new Dictionary<HealthDataType, IEnumerable<HealthData>>();
 
-            foreach (var dataType in dataTypes)
+            if (dic.Count == 0)
+                throw new InvalidOperationException("No DataTypes specified! Please use .AddDataType before calling .FetchDataAsync");
+
+            foreach (var data in _selectedDataTypes)
             {
-                dic.Add(dataType, await FetchDataAsync(dataType));
+                dic.Add(data.Key, await QueryAsync(data.Key, data.Value, _aggregateTime, _startDate, _endDate));
             }
 
             return new ReadOnlyDictionary<HealthDataType, IEnumerable<HealthData>>(dic);
         }
 
-        public IHealthService SetDateRange(DateTime startDate, DateTime endDate)
+        public IHealthService AddDataType(HealthDataType healthDataType, AggregateType aggregateType)
         {
-            StartDate = startDate;
-            EndDate   = endDate;
+            if (!_selectedDataTypes.ContainsKey(healthDataType))
+                _selectedDataTypes.Add(healthDataType, aggregateType);
             return this;
         }
 
-        public IHealthService SetStartDate(DateTime startDate)
+        public IHealthService DateRange(DateTime startDate, DateTime endDate)
         {
-            StartDate = startDate;
+            _startDate = startDate;
+            _endDate   = endDate;
             return this;
         }
 
-        public IHealthService SetEndDate(DateTime endDate)
+        public IHealthService Aggregate(AggregateTime aggregateTime)
         {
-            EndDate = endDate;
+            _aggregateTime = aggregateTime;
             return this;
         }
 
-        public IHealthService SetAggregateType(AggregateTime aggregateTime)
-        {
-            AggregateTime = aggregateTime;
-            return this;
-        }
+        protected abstract Task<IEnumerable<HealthData>> QueryAsync(HealthDataType dataTypes,
+                                                                    AggregateType aggregateType,
+                                                                    AggregateTime aggregateTime,
+                                                                    DateTime startDate, DateTime endDate);
 
     }
 }

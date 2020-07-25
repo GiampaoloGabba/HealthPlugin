@@ -77,18 +77,16 @@ namespace Plugin.Health
             return fitnessBuilder.Build();
         }
 
-        public override async Task<IEnumerable<HealthData>> FetchDataAsync(HealthDataType healthDataType)
+        protected override async Task<IEnumerable<HealthData>> QueryAsync(HealthDataType healthDataType,
+                                                                          AggregateType aggregateType,
+                                                                          AggregateTime aggregateTime,
+                                                                          DateTime startDate, DateTime endDate)
         {
             var authorized = HasOAuthPermission(GetFitnessOptions(healthDataType));
 
             if (!authorized)
                 throw new UnauthorizedAccessException($"Not enough permissions to request {healthDataType}");
 
-            return await QueryAsync(healthDataType, StartDate, EndDate);
-        }
-
-        async Task<IEnumerable<HealthData>> QueryAsync(HealthDataType healthDataType, DateTime startDate, DateTime endDate)
-        {
             var googleFitData     = healthDataType.ToGoogleFit();
             var googleFitDataType = googleFitData.TypeIdentifier;
             var startTime         = startDate.ToJavaTimeStamp();
@@ -98,11 +96,11 @@ namespace Plugin.Health
                               .SetTimeRange(startTime, endTime, TimeUnit.Milliseconds)
                               .EnableServerQueries();
 
-            if (AggregateTime != AggregateTime.None && googleFitData.AggregateTypeIdentifier != null)
+            if (aggregateTime != AggregateTime.None && googleFitData.AggregateTypeIdentifier != null)
             {
                 readBuilder.Aggregate(googleFitDataType, googleFitData.AggregateTypeIdentifier);
 
-                switch (AggregateTime)
+                switch (aggregateTime)
                 {
                     case AggregateTime.Year:
                         readBuilder.BucketByTime(365, TimeUnit.Days);
@@ -149,7 +147,7 @@ namespace Plugin.Health
                 {
                     foreach (var dataSet in bucket.DataSets)
                     {
-                        output.AddRange(dataSet.DataPoints.Select(result=>CreateHealthData(result, googleFitData.Unit)));
+                        output.AddRange(dataSet.DataPoints.Select(result => CreateHealthData(result, googleFitData.Unit)));
                     }
                 }
 
