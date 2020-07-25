@@ -6,6 +6,12 @@ namespace Plugin.Health
 {
     internal static class Extensions
     {
+        //More info for init HKUnit:
+        //https://developer.apple.com/documentation/healthkit/hkunit/1615733-init
+
+        //More info on datatype:
+        //https://github.com/dariosalvi78/cordova-plugin-health
+
         internal static HealthKitData ToHealthKit(this HealthDataType healthDataType)
         {
             switch (healthDataType)

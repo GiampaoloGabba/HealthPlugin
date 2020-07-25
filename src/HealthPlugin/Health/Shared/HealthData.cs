@@ -2,6 +2,7 @@
 
 namespace Plugin.Health
 {
+    [Preserve(AllMembers = true)]
     public class HealthData
     {
         public DateTime StartDate   { get; set; }
@@ -9,7 +10,6 @@ namespace Plugin.Health
         public double   Value       { get; set; }
         public bool     UserEntered { get; set; }
     }
-
 
     public enum AggregateTime
     {
@@ -35,6 +35,7 @@ namespace Plugin.Health
         Max
     }
 
+    [Preserve(AllMembers = true)]
     public enum HealthDataType
     {
         StepCount,

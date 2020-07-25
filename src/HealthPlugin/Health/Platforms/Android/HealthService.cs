@@ -14,6 +14,7 @@ using Debug = System.Diagnostics.Debug;
 
 namespace Plugin.Health
 {
+    [Preserve(AllMembers = true)]
     public class HealthService : BaseHealthService
     {
         //Info su oauth e googlefit
@@ -23,11 +24,12 @@ namespace Plugin.Health
 
         //Esempi di utilizzo GoogleFit
         //aggregation: https://github.com/dariosalvi78/cordova-plugin-health/blob/master/src/android/HealthPlugin.java
+        //datatypes: https://developers.google.com/android/reference/com/google/android/gms/fitness/data/DataType#TYPE_STEP_COUNT_DELTA
 
         Activity _activity => CrossCurrentActivity.Current.Activity ??
                               throw new NullReferenceException("Please call HealthService.Init() method in the platform specific project to use Health Plugin");
         Context _context => CrossCurrentActivity.Current.AppContext;
-        const int RequestCode = 1;
+        const int REQUEST_CODE = 1;
         static TaskCompletionSource<bool> _tcsAuth;
 
         public override bool IsDataTypeAvailable(HealthDataType healthDataType)
@@ -55,7 +57,7 @@ namespace Plugin.Health
             }
             else
             {
-                GoogleSignIn.RequestPermissions(_activity, RequestCode,
+                GoogleSignIn.RequestPermissions(_activity, REQUEST_CODE,
                     GoogleSignIn.GetLastSignedInAccount(_context), fitnessOptions);
             }
 
@@ -205,7 +207,7 @@ namespace Plugin.Health
 
         public static void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
-            _tcsAuth.TrySetResult(requestCode == RequestCode && resultCode == Result.Ok);
+            _tcsAuth.TrySetResult(requestCode == REQUEST_CODE && resultCode == Result.Ok);
         }
     }
 }

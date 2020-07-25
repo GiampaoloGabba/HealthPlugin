@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace Plugin.Health
 {
+    [Preserve(AllMembers = true)]
     public interface IHealthService
     {
         /// <summary>

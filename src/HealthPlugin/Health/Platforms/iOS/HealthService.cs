@@ -8,6 +8,7 @@ using HealthKit;
 
 namespace Plugin.Health
 {
+    [Preserve(AllMembers = true)]
     public class HealthService : BaseHealthService
     {
         readonly HKHealthStore _healthStore;

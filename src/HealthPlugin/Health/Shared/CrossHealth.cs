@@ -2,7 +2,7 @@
 
 namespace Plugin.Health
 {
-    public partial class CrossHealth
+    public class CrossHealth
     {
         static readonly Lazy<IHealthService> Implementation = new Lazy<IHealthService>(CreateHealthService, System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
