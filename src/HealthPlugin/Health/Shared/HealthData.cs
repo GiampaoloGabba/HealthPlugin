@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Plugin.Health
 {
@@ -19,8 +19,7 @@ namespace Plugin.Health
         Week,
         Day,
         Hour,
-        Minute,
-        Second
+        Minute
     }
 
     public enum HealthDataType
@@ -28,5 +27,24 @@ namespace Plugin.Health
         StepCount,
         Distance,
         HeartRate,
+        Height,
+        Weight,
+        Energy,
+        Water,
+        BodyFat,
+        BodyMassIndex,
+        ActiveEnergyBurned,
+        BodyTemperature,
+        BloodPressureSystolic,
+        BloodPressureDiastolic,
+        BloodOxygen,
+        BloodGlucose,
+
+        iOS_WalkingHeartRate,
+        iOS_RestingHeartRate,
+        iOS_BasalEnergyBurned,
+        iOS_WaistCircumference,
+        iOS_StandTime,
+        iOS_ExerciseTime
     }
 }
