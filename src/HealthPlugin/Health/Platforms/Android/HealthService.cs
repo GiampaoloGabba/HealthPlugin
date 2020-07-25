@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,13 +22,10 @@ namespace Plugin.Health
         //https://developers.google.com/fit/android/authorization#android-10
 
         //Esempi di utilizzo GoogleFit
-        //https://github.com/googlearchive/android-fit/blob/master/BasicHistoryApi/app/src/main/java/com/google/android/gms/fit/samples/basichistoryapi/MainActivity.java
-        //https://github.com/xamarin/monodroid-samples/blob/master/google-services/Fitness/BasicHistoryApi/BasicHistoryApi/MainActivity.cs
-        //https://github.com/krokyze/FitKit/blob/master/android/src/main/kotlin/com/example/fit_kit/FitKitPlugin.kt
-        //https://github.com/cph-cachet/flutter-plugins/blob/master/packages/health/android/src/main/kotlin/cachet/plugins/health/HealthPlugin.kt
+        //aggregation: https://github.com/dariosalvi78/cordova-plugin-health/blob/master/src/android/HealthPlugin.java
 
         Activity _activity => CrossCurrentActivity.Current.Activity ??
-                                      throw new NullReferenceException("Please call HealthService.Init() method in the platform specific project to use Health Plugin");
+                              throw new NullReferenceException("Please call HealthService.Init() method in the platform specific project to use Health Plugin");
         Context _context => CrossCurrentActivity.Current.AppContext;
         const int RequestCode = 1;
         static TaskCompletionSource<bool> _tcsAuth;
