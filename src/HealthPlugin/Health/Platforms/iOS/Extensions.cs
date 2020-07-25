@@ -5,25 +5,25 @@ namespace Plugin.Health
 {
     internal static class Extensions
     {
-        internal static HealthKitData ToHealthKit(this HealthData.DataType dataType)
+        internal static HealthKitData ToHealthKit(this HealthDataType healthDataType)
         {
-            switch (dataType)
+            switch (healthDataType)
             {
-                case HealthData.DataType.StepCount:
+                case HealthDataType.StepCount:
                     return new HealthKitData
                     {
                         TypeIdentifier = HKQuantityTypeIdentifier.StepCount,
                         Unit           = HKUnit.Count,
                     };
 
-                case HealthData.DataType.Distance:
+                case HealthDataType.Distance:
                     return new HealthKitData
                     {
                         TypeIdentifier = HKQuantityTypeIdentifier.DistanceWalkingRunning,
                         Unit           = HKUnit.Meter,
                     };
 
-                case HealthData.DataType.HeartRate:
+                case HealthDataType.HeartRate:
                     return new HealthKitData
                     {
                         TypeIdentifier = HKQuantityTypeIdentifier.HeartRate,

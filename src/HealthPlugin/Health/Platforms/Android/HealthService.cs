@@ -9,11 +9,12 @@ using Android.Gms.Fitness;
 using Android.Gms.Fitness.Data;
 using Android.Gms.Fitness.Request;
 using Java.Util.Concurrent;
+using Plugin.CurrentActivity;
 using Debug = System.Diagnostics.Debug;
 
 namespace Plugin.Health
 {
-    public partial class HealthService : IHealthService
+    public class HealthService : BaseHealthService
     {
         //Info su oauth e googlefit
         //https://developers.google.com/fit/android/get-started
@@ -26,35 +27,26 @@ namespace Plugin.Health
         //https://github.com/krokyze/FitKit/blob/master/android/src/main/kotlin/com/example/fit_kit/FitKitPlugin.kt
         //https://github.com/cph-cachet/flutter-plugins/blob/master/packages/health/android/src/main/kotlin/cachet/plugins/health/HealthPlugin.kt
 
-        static Activity _activity;
-        Context _context;
+        Activity _activity => CrossCurrentActivity.Current.Activity ??
+                                      throw new NullReferenceException("Please call HealthService.Init() method in the platform specific project to use Health Plugin");
+        Context _context => CrossCurrentActivity.Current.AppContext;
         const int RequestCode = 1;
         static TaskCompletionSource<bool> _tcsAuth;
 
-        public HealthService()
-        {
-            if (_activity == null)
-            {
-                throw new Exception("Please call HealthService.Init() method in the platform specific project to use Health Plugin");
-            }
-
-            _context = Application.Context;
-        }
-
-        public bool IsDataTypeAvailable(HealthData.DataType dataType)
+        public override bool IsDataTypeAvailable(HealthDataType healthDataType)
         {
             try
             {
-                return dataType.ToGoogleFit() != null;
+                return healthDataType.ToGoogleFit() != null;
             }
             catch (ArgumentOutOfRangeException e)
             {
-                Debug.WriteLine($"GoogleFit - Datatype {dataType} is not supported in this device", e);
+                Debug.WriteLine($"GoogleFit - Datatype {healthDataType} is not supported in this device", e);
                 return false;
             }
         }
 
-        public Task<bool> RequestPermissionAsync(params HealthData.DataType[] dataTypes)
+        public override Task<bool> RequestPermissionAsync(params HealthDataType[] dataTypes)
         {
             var fitnessOptions = GetFitnessOptions(dataTypes);
 
@@ -78,7 +70,7 @@ namespace Plugin.Health
             return GoogleSignIn.HasPermissions(GoogleSignIn.GetLastSignedInAccount(_context), fitnessOptions);
         }
 
-        FitnessOptions GetFitnessOptions(params HealthData.DataType[] dataTypes)
+        FitnessOptions GetFitnessOptions(params HealthDataType[] dataTypes)
         {
             var fitnessBuilder = FitnessOptions.InvokeBuilder();
             foreach (var dataType in dataTypes)
@@ -88,26 +80,19 @@ namespace Plugin.Health
             return fitnessBuilder.Build();
         }
 
-        async Task<List<HealthData>> FetchDataAsync(HealthData.DataType dataType, DateTime startDate, DateTime endDate, bool requestPermissionIfNeeded)
+        public override async Task<IEnumerable<HealthData>> FetchDataAsync(HealthDataType healthDataType)
         {
-            var authorized = HasOAuthPermission(GetFitnessOptions(dataType));
-
-            if (!authorized && !requestPermissionIfNeeded)
-                throw new UnauthorizedAccessException($"Not enough permissions to request {dataType}");
+            var authorized = HasOAuthPermission(GetFitnessOptions(healthDataType));
 
             if (!authorized)
-            {
-                var permission = await RequestPermissionAsync(dataType);
-                if (!permission)
-                    throw new UnauthorizedAccessException($"Not enough permissions to request {dataType}");
-            }
+                throw new UnauthorizedAccessException($"Not enough permissions to request {healthDataType}");
 
-            return await QueryAsync(dataType, startDate, endDate);
+            return await QueryAsync(healthDataType, StartDate, EndDate);
         }
 
-        async Task<List<HealthData>> QueryAsync(HealthData.DataType dataType, DateTime startDate, DateTime endDate)
+        async Task<IEnumerable<HealthData>> QueryAsync(HealthDataType healthDataType, DateTime startDate, DateTime endDate)
         {
-            var googleFitData     = dataType.ToGoogleFit();
+            var googleFitData     = healthDataType.ToGoogleFit();
             var googleFitDataType = googleFitData.TypeIdentifier;
             var startTime         = startDate.ToJavaTimeStamp();
             var endTime           = endDate.ToJavaTimeStamp();
@@ -116,33 +101,33 @@ namespace Plugin.Health
                               .SetTimeRange(startTime, endTime, TimeUnit.Milliseconds)
                               .EnableServerQueries();
 
-            if (_aggregateType != HealthData.AggregateType.None && googleFitData.AggregateTypeIdentifier != null)
+            if (AggregateType != AggregateType.None && googleFitData.AggregateTypeIdentifier != null)
             {
                 readBuilder.Aggregate(googleFitDataType, googleFitData.AggregateTypeIdentifier);
 
-                switch (_aggregateType)
+                switch (AggregateType)
                 {
-                    case HealthData.AggregateType.Year:
+                    case AggregateType.Year:
                         readBuilder.BucketByTime(365, TimeUnit.Days);
                         break;
 
-                    case HealthData.AggregateType.Month:
+                    case AggregateType.Month:
                         readBuilder.BucketByTime(31, TimeUnit.Days);
                         break;
 
-                    case HealthData.AggregateType.Week:
+                    case AggregateType.Week:
                         readBuilder.BucketByTime(7, TimeUnit.Days);
                         break;
 
-                    case HealthData.AggregateType.Hour:
+                    case AggregateType.Hour:
                         readBuilder.BucketByTime(1, TimeUnit.Hours);
                         break;
 
-                    case HealthData.AggregateType.Minute:
+                    case AggregateType.Minute:
                         readBuilder.BucketByTime(1, TimeUnit.Minutes);
                         break;
 
-                    case HealthData.AggregateType.Second:
+                    case AggregateType.Second:
                         readBuilder.BucketByTime(1, TimeUnit.Seconds);
                         break;
 
@@ -220,9 +205,9 @@ namespace Plugin.Health
             }
         }
 
-        public static void Init(Activity activity)
+        public static void Init(Application application)
         {
-            _activity = activity;
+            CrossCurrentActivity.Current.Init(application);
         }
 
         public static void OnActivityResult(int requestCode, Result resultCode, Intent data)

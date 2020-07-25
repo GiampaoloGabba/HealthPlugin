@@ -1,4 +1,4 @@
-<Project Sdk="MSBuild.Sdk.Extras/2.0.41">
+<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
 
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;MonoAndroid90;MonoAndroid10.0;Xamarin.iOS10;</TargetFrameworks>
@@ -61,30 +61,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSBuild.Sdk.Extras" Version="2.0.41" PrivateAssets="All" />
         <Compile Include="**\Shared\*.cs" />
     </ItemGroup>
 
     <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid10.0'">
+    <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
         <PackageReference Include="Xamarin.GooglePlayServices.Auth" Version="71.1600.4" />
         <PackageReference Include="Xamarin.GooglePlayServices.Fitness" Version="71.1601.4" />
-    </ItemGroup>
-
-    <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+		<PackageReference Include="Plugin.CurrentActivity" Version="2.1.0.4" />
         <Compile Include="Platforms\Android\**\*.cs" />
-        <AndroidResource Include="Resources\**\*.xml" />
     </ItemGroup>
 
     <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
         <Compile Include="Platforms\iOS\**\*.cs" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid90'">
-      <PackageReference Include="Xamarin.GooglePlayServices.Auth" Version="71.1600.4" />
-      <PackageReference Include="Xamarin.GooglePlayServices.Fitness" Version="71.1601.4" />
     </ItemGroup>
 
     <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />

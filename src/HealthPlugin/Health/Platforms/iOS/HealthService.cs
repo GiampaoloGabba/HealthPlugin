@@ -8,7 +8,7 @@ using HealthKit;
 
 namespace Plugin.Health
 {
-    public partial class HealthService : IHealthService
+    public class HealthService : BaseHealthService
     {
         //TODO
         //Aggiungere altri tipi
@@ -27,24 +27,28 @@ namespace Plugin.Health
             if (HKHealthStore.IsHealthDataAvailable)
                 _healthStore = new HKHealthStore();
             else
-                throw new NotSupportedException("HEALTHKIT is not available in this device!");
+                Debug.WriteLine("HEALTHKIT is not available on this device!");
         }
 
-        public bool IsDataTypeAvailable(HealthData.DataType dataType)
+        public override bool IsDataTypeAvailable(HealthDataType healthDataType)
         {
             try
             {
-                return dataType.ToHealthKit() != null;
+                return healthDataType.ToHealthKit() != null;
             }
             catch (ArgumentOutOfRangeException e)
             {
-                Debug.WriteLine($"HEALTHKIT - Datatype {dataType} is not supported in this device", e);
+                Debug.WriteLine($"HEALTHKIT - Datatype {healthDataType} is not supported in this device", e);
                 return false;
             }
         }
 
-        public async Task<bool> RequestPermissionAsync(params HealthData.DataType[] dataTypes)
+        public override async Task<bool> RequestPermissionAsync(params HealthDataType[] dataTypes)
         {
+
+            if (_healthStore == null)
+                throw new NotSupportedException("HEALTHKIT is not available on this device!");
+
             var result = dataTypes.Where(IsDataTypeAvailable).ToArray();
 
             if (HKHealthStore.IsHealthDataAvailable && result.Any())
@@ -60,69 +64,55 @@ namespace Plugin.Health
             return false;
         }
 
-        async Task<List<HealthData>> FetchDataAsync(
-            HealthData.DataType dataType,
-            DateTime startDate,
-            DateTime endDate,
-            bool requestPermissionIfNeeded)
+        public override async Task<IEnumerable<HealthData>> FetchDataAsync(HealthDataType healthDataType)
         {
-            if (!HKHealthStore.IsHealthDataAvailable)
+            if (_healthStore == null || !HKHealthStore.IsHealthDataAvailable)
                 throw new NotSupportedException("HealthKit data is not available on this device");
 
-            var authorized = IsAuthorizedToRead(dataType);
-
-            if (!authorized && !requestPermissionIfNeeded)
-                throw new UnauthorizedAccessException($"Not enough permissions to request {dataType}");
+            var authorized = IsAuthorizedToRead(healthDataType);
 
             if (!authorized)
-            {
-                var permission = await RequestPermissionAsync(dataType);
-                if (!permission)
-                    throw new UnauthorizedAccessException($"Not enough permissions to request {dataType}");
-            }
+                throw new UnauthorizedAccessException($"Not enough permissions to request {healthDataType}");
 
-            return await QueryAsync(dataType, startDate, endDate);
+            return await QueryAsync(healthDataType, StartDate, EndDate);
         }
 
-        Task<List<HealthData>> QueryAsync(
-            HealthData.DataType dataType,
-            DateTime startDate,
-            DateTime endDate)
+        Task<IEnumerable<HealthData>> QueryAsync(HealthDataType healthDataType, DateTime startDate, DateTime endDate)
         {
-            var taskComplSrc = new TaskCompletionSource<List<HealthData>>();
-            var healthKitType = dataType.ToHealthKit();
+            var taskComplSrc = new TaskCompletionSource<IEnumerable<HealthData>>();
+            var healthKitType = healthDataType.ToHealthKit();
             var quantityType = HKQuantityType.Create(healthKitType.TypeIdentifier);
             var predicate = HKQuery.GetPredicateForSamples((NSDate) startDate, (NSDate) endDate, HKQueryOptions.StrictStartDate);
             var sortDescriptor = new[] {new NSSortDescriptor(HKSample.SortIdentifierEndDate, true)};
 
-            if (_aggregateType != HealthData.AggregateType.None)
+            if (AggregateType != AggregateType.None)
             {
                 var anchor   = NSCalendar.CurrentCalendar.DateBySettingsHour(0, 0, 0, NSDate.Now, NSCalendarOptions.None);
                 var interval = new NSDateComponents();
 
-                switch (_aggregateType)
+                switch (AggregateType)
                 {
-                    case HealthData.AggregateType.Year:
+                    case AggregateType.Year:
                         interval.Year = 1;
                         break;
 
-                    case HealthData.AggregateType.Month:
+                    case AggregateType.Month:
                         interval.Month = 1;
                         break;
 
-                    case HealthData.AggregateType.Week:
+                    case AggregateType.Week:
                         interval.Week = 1;
                         break;
 
-                    case HealthData.AggregateType.Hour:
+                    case AggregateType.Hour:
                         interval.Hour = 1;
                         break;
 
-                    case HealthData.AggregateType.Minute:
+                    case AggregateType.Minute:
                         interval.Hour = 1;
                         break;
 
-                    case HealthData.AggregateType.Second:
+                    case AggregateType.Second:
                         interval.Second = 1;
                         break;
 
@@ -182,9 +172,9 @@ namespace Plugin.Health
             return false;
         }*/
 
-        bool IsAuthorizedToRead(HealthData.DataType dataType)
+        bool IsAuthorizedToRead(HealthDataType healthDataType)
         {
-            if (IsDataTypeAvailable(dataType))
+            if (IsDataTypeAvailable(healthDataType))
             {
                 //Note: authorizationStatus is to determine the access status only to write but not to read.
                 //There is no option to know whether your app has read access.
@@ -210,7 +200,7 @@ namespace Plugin.Health
             }
         }
 
-        NSSet DataTypesToRead(HealthData.DataType[] dataTypes)
+        NSSet DataTypesToRead(HealthDataType[] dataTypes)
         {
             var types = new HKObjectType[dataTypes.Length];
             for (var i = 0; i < dataTypes.Length; i++)

@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 
 namespace Plugin.Health
 {
@@ -29,7 +29,7 @@ namespace Plugin.Health
 
         static IHealthService CreateHealthService()
         {
-#if NETSTANDARD1_0
+#if NETSTANDARD2_0
             return null;
 #else
             return new HealthService();

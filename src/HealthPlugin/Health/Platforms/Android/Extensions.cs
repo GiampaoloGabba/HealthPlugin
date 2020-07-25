@@ -5,11 +5,11 @@ namespace Plugin.Health
 {
     internal static class Extensions
     {
-        internal static GoogleFitData ToGoogleFit(this HealthData.DataType dataType)
+        internal static GoogleFitData ToGoogleFit(this HealthDataType healthDataType)
         {
-            switch (dataType)
+            switch (healthDataType)
             {
-                case HealthData.DataType.StepCount:
+                case HealthDataType.StepCount:
                     return new GoogleFitData
                     {
                         TypeIdentifier          = DataType.TypeStepCountDelta,
@@ -17,7 +17,7 @@ namespace Plugin.Health
                         Unit                    = Field.FieldSteps,
                     };
 
-                case HealthData.DataType.Distance:
+                case HealthDataType.Distance:
                     return new GoogleFitData
                     {
                         TypeIdentifier          = DataType.TypeDistanceDelta,
@@ -25,7 +25,7 @@ namespace Plugin.Health
                         Unit                    = Field.FieldDistance,
                     };
 
-                case HealthData.DataType.HeartRate:
+                case HealthDataType.HeartRate:
                     return new GoogleFitData
                     {
                         TypeIdentifier          = DataType.TypeHeartRateBpm,
