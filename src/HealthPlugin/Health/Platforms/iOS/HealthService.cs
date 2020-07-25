@@ -43,7 +43,7 @@ namespace Plugin.Health
 
             if (HKHealthStore.IsHealthDataAvailable && result.Any())
             {
-                var (res, error) = await _healthStore.RequestAuthorizationToShareAsync(null, DataTypesToRead(result));
+                var (res, error) = await _healthStore.RequestAuthorizationToShareAsync(null, DataTypesToRead(result)).ConfigureAwait(false);
 
                 if (error != null)
                     throw new Exception($"HEALTHKIT - Error during Permission request: {error.LocalizedDescription}");

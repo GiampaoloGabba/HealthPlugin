@@ -25,7 +25,7 @@ namespace Plugin.Health
 
             foreach (var data in _selectedDataTypes)
             {
-                dic.Add(data.Key, await QueryAsync(data.Key, data.Value, _aggregateTime, _startDate, _endDate));
+                dic.Add(data.Key, await QueryAsync(data.Key, data.Value, _aggregateTime, _startDate, _endDate).ConfigureAwait(false));
             }
 
             return new ReadOnlyDictionary<HealthDataType, IEnumerable<HealthData>>(dic);

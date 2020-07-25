@@ -135,7 +135,7 @@ namespace Plugin.Health
             var readRequest = readBuilder.Build();
 
             var response = await FitnessClass.GetHistoryClient(_activity, GoogleSignIn.GetLastSignedInAccount(_activity))
-                                             .ReadDataAsync(readRequest);
+                                             .ReadDataAsync(readRequest).ConfigureAwait(false);
 
             if (response == null)
                 return new List<HealthData>();

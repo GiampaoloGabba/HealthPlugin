@@ -4,10 +4,10 @@ namespace Plugin.Health
 {
     public class HealthData
     {
-        public DateTime   StartDate   { get; set; }
-        public DateTime   EndDate     { get; set; }
-        public double     Value       { get; set; }
-        public bool       UserEntered { get; set; }
+        public DateTime StartDate   { get; set; }
+        public DateTime EndDate     { get; set; }
+        public double   Value       { get; set; }
+        public bool     UserEntered { get; set; }
     }
 
 
@@ -22,6 +22,10 @@ namespace Plugin.Health
         Minute
     }
 
+    /// <summary>
+    /// CumulativeSum is not supported by all HealthDatatypes.
+    /// When not supported will Fallback to Average
+    /// </summary>
     public enum AggregateType
     {
         None,
