@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Plugin.Health
 {
@@ -21,28 +19,9 @@ namespace Plugin.Health
         Task<bool> RequestPermissionAsync(params HealthDataType[] dataTypes);
 
         /// <summary>
-        /// Set the DateTime range to the data query
+        /// Instantiate de DataReader for HealthKit/GoogleFit
         /// </summary>
-        /// <param name="startDate">Start Date</param>
-        /// <param name="endDate">End Date</param>
-        IHealthService DateRange(DateTime startDate, DateTime endDate);
-
-        /// <summary>
-        /// Activate data aggregation in HealthKit/GoogleFit query
-        /// </summary>
-        /// <param name="aggregateTime">Time unit for the aggregaton</param>
-        IHealthService Aggregate(AggregateTime aggregateTime);
-
-        /// <summary>
-        /// Add HealthDataTypes to the data query
-        /// </summary>
-        /// <param name="healthDataType">HealthDataType to query</param>
-        /// <param name="aggregateType">Aggregation Options (ignored if Aggregate is not set)</param>
-        IHealthService AddDataType(HealthDataType healthDataType, AggregateType aggregateType = AggregateType.None);
-
-        /// <summary>
-        /// Fetch data from HealthKit/Google fit
-        /// </summary>
-        Task<IReadOnlyDictionary<HealthDataType, IEnumerable<HealthData>>> FetchDataAsync();
+        /// <returns></returns>
+        IHealthDataReader DataReader();
     }
 }

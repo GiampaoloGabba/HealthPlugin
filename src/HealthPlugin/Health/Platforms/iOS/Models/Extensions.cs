@@ -20,111 +20,117 @@ namespace Plugin.Health
 
                     return new HealthKitData
                     {
-                        TypeIdentifier  = HKQuantityTypeIdentifier.StepCount,
-                        Unit            = HKUnit.Count,
-                        StatisticOption = HKStatisticsOptions.CumulativeSum
+                        Unit = HKUnit.Count,
+                        TypeIdentifier         = HKQuantityTypeIdentifier.StepCount,
+                        DefaultStatisticOption = HKStatisticsOptions.CumulativeSum,
+                        NegateCumulativeSum    = false
+
                     };
 
                 case HealthDataType.Distance:
                     return new HealthKitData
                     {
-                        TypeIdentifier  = HKQuantityTypeIdentifier.DistanceWalkingRunning,
-                        Unit            = HKUnit.Meter,
-                        StatisticOption = HKStatisticsOptions.CumulativeSum
+                        Unit = HKUnit.Meter,
+                        TypeIdentifier         = HKQuantityTypeIdentifier.DistanceWalkingRunning,
+                        DefaultStatisticOption = HKStatisticsOptions.CumulativeSum,
+                        NegateCumulativeSum    = false
                     };
 
                 case HealthDataType.HeartRate:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.Count.UnitDividedBy(HKUnit.Minute),
                         TypeIdentifier = HKQuantityTypeIdentifier.HeartRate,
-                        Unit           = HKUnit.Count.UnitDividedBy(HKUnit.Minute),
                     };
 
                 case HealthDataType.Height:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.Meter,
                         TypeIdentifier = HKQuantityTypeIdentifier.Height,
-                        Unit           = HKUnit.Meter
                     };
 
                 case HealthDataType.Weight:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.Gram,
                         TypeIdentifier = HKQuantityTypeIdentifier.BodyMass,
-                        Unit           = HKUnit.Gram
                     };
 
                 case HealthDataType.Energy:
                     return new HealthKitData
                     {
-                        TypeIdentifier  = HKQuantityTypeIdentifier.ActiveEnergyBurned,
-                        Unit            = HKUnit.Kilocalorie,
-                        StatisticOption = HKStatisticsOptions.CumulativeSum
+                        Unit = HKUnit.Kilocalorie,
+                        TypeIdentifier         = HKQuantityTypeIdentifier.ActiveEnergyBurned,
+                        DefaultStatisticOption = HKStatisticsOptions.CumulativeSum,
+                        NegateCumulativeSum    = false
                     };
 
                 case HealthDataType.Water:
                     return new HealthKitData
                     {
-                        TypeIdentifier  = HKQuantityTypeIdentifier.DietaryWater,
-                        Unit            = HKUnit.Liter,
-                        StatisticOption = HKStatisticsOptions.CumulativeSum
+                        Unit = HKUnit.Liter,
+                        TypeIdentifier         = HKQuantityTypeIdentifier.DietaryWater,
+                        DefaultStatisticOption = HKStatisticsOptions.CumulativeSum,
+                        NegateCumulativeSum    = false
                     };
 
                 case HealthDataType.BodyFat:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.Percent,
                         TypeIdentifier = HKQuantityTypeIdentifier.BodyFatPercentage,
-                        Unit           = HKUnit.Percent
                     };
 
                 case HealthDataType.BodyMassIndex:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.FromString(""),
                         TypeIdentifier = HKQuantityTypeIdentifier.BodyMassIndex,
-                        Unit           = HKUnit.FromString("")
                     };
 
                 case HealthDataType.ActiveEnergyBurned:
                     return new HealthKitData
                     {
-                        TypeIdentifier  = HKQuantityTypeIdentifier.ActiveEnergyBurned,
-                        Unit            = HKUnit.Kilocalorie,
-                        StatisticOption = HKStatisticsOptions.CumulativeSum
+                        Unit = HKUnit.Kilocalorie,
+                        TypeIdentifier         = HKQuantityTypeIdentifier.ActiveEnergyBurned,
+                        DefaultStatisticOption = HKStatisticsOptions.CumulativeSum,
+                        NegateCumulativeSum    = false
                     };
 
                 case HealthDataType.BodyTemperature:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.DegreeCelsius,
                         TypeIdentifier = HKQuantityTypeIdentifier.BodyTemperature,
-                        Unit           = HKUnit.DegreeCelsius
                     };
 
                 case HealthDataType.BloodPressureSystolic:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.MillimeterOfMercury,
                         TypeIdentifier = HKQuantityTypeIdentifier.BloodPressureSystolic,
-                        Unit           = HKUnit.MillimeterOfMercury
                     };
 
                 case HealthDataType.BloodPressureDiastolic:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.MillimeterOfMercury,
                         TypeIdentifier = HKQuantityTypeIdentifier.BloodPressureDiastolic,
-                        Unit           = HKUnit.MillimeterOfMercury
                     };
 
                 case HealthDataType.BloodOxygen:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.Percent,
                         TypeIdentifier = HKQuantityTypeIdentifier.OxygenSaturation,
-                        Unit           = HKUnit.Percent
                     };
 
                 case HealthDataType.BloodGlucose:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.FromString("mg/dl"),
                         TypeIdentifier = HKQuantityTypeIdentifier.BloodGlucose,
-                        Unit           = HKUnit.FromString("mg/dl")
                     };
 
                 // IOS SPECIFIC
@@ -132,47 +138,50 @@ namespace Plugin.Health
                 case HealthDataType.iOS_WalkingHeartRate:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.Count.UnitDividedBy(HKUnit.Minute),
                         TypeIdentifier = HKQuantityTypeIdentifier.WalkingHeartRateAverage,
-                        Unit           = HKUnit.Count.UnitDividedBy(HKUnit.Minute)
                     };
 
                 case HealthDataType.iOS_RestingHeartRate:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.Count.UnitDividedBy(HKUnit.Minute),
                         TypeIdentifier = HKQuantityTypeIdentifier.RestingHeartRate,
-                        Unit           = HKUnit.Count.UnitDividedBy(HKUnit.Minute)
                     };
 
                 case HealthDataType.iOS_BasalEnergyBurned:
                     return new HealthKitData
                     {
-                        TypeIdentifier  = HKQuantityTypeIdentifier.BasalEnergyBurned,
-                        Unit            = HKUnit.Kilocalorie,
-                        StatisticOption = HKStatisticsOptions.CumulativeSum
+                        Unit = HKUnit.Kilocalorie,
+                        TypeIdentifier         = HKQuantityTypeIdentifier.BasalEnergyBurned,
+                        DefaultStatisticOption = HKStatisticsOptions.CumulativeSum,
+                        NegateCumulativeSum    = false
                     };
 
                 case HealthDataType.iOS_WaistCircumference:
                     return new HealthKitData
                     {
+                        Unit = HKUnit.Meter,
                         TypeIdentifier = HKQuantityTypeIdentifier.WaistCircumference,
-                        Unit           = HKUnit.Meter
                     };
 
                 case HealthDataType.iOS_StandTime:
                     ThrowIfUnsupported(13, 0);
                     return new HealthKitData
                     {
-                        TypeIdentifier  = HKQuantityTypeIdentifier.AppleStandTime,
-                        Unit            = HKUnit.Minute,
-                        StatisticOption = HKStatisticsOptions.CumulativeSum
+                        Unit = HKUnit.Minute,
+                        TypeIdentifier         = HKQuantityTypeIdentifier.AppleStandTime,
+                        DefaultStatisticOption = HKStatisticsOptions.CumulativeSum,
+                        NegateCumulativeSum    = false
                     };
 
                 case HealthDataType.iOS_ExerciseTime:
                     return new HealthKitData
                     {
-                        TypeIdentifier  = HKQuantityTypeIdentifier.AppleExerciseTime,
-                        Unit            = HKUnit.Minute,
-                        StatisticOption = HKStatisticsOptions.CumulativeSum
+                        Unit = HKUnit.Minute,
+                        TypeIdentifier         = HKQuantityTypeIdentifier.AppleExerciseTime,
+                        DefaultStatisticOption = HKStatisticsOptions.CumulativeSum,
+                        NegateCumulativeSum    = false
                     };
 
                 default:
