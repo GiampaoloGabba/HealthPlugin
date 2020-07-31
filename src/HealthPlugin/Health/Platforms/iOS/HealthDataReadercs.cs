@@ -7,7 +7,6 @@ using HealthKit;
 
 namespace Plugin.Health
 {
-    [Preserve(AllMembers = true)]
     public class HealthDataReader : HealthDataReaderBase
     {
         readonly HealthService _healthService;
@@ -19,10 +18,9 @@ namespace Plugin.Health
             _healthStore = healthService.HealthStore;
         }
 
-        protected override Task<IEnumerable<HealthData>> QueryAsync(HealthDataType healthDataType,
-                                                                    AggregateType aggregateType,
-                                                                    AggregateTime aggregateTime,
-                                                                    DateTime startDate, DateTime endDate)
+        protected override Task<IEnumerable<T>> Query<T>(HealthDataType healthDataType,
+                                                        AggregateTime aggregateTime,
+                                                        DateTime startDate, DateTime endDate)
         {
             if (_healthStore == null || !HKHealthStore.IsHealthDataAvailable)
                 throw new NotSupportedException("HealthKit data is not available on this device");
@@ -32,13 +30,12 @@ namespace Plugin.Health
             if (!authorized)
                 throw new UnauthorizedAccessException($"Not enough permissions to request {healthDataType}");
 
-            var taskComplSrc   = new TaskCompletionSource<IEnumerable<HealthData>>();
-            var healthKitType  = healthDataType.ToHealthKit();
-            var quantityType   = HKQuantityType.Create(healthKitType.TypeIdentifier);
-            var predicate      = HKQuery.GetPredicateForSamples((NSDate) startDate, (NSDate) endDate, HKQueryOptions.StrictStartDate);
-            var sortDescriptor = new[] {new NSSortDescriptor(HKSample.SortIdentifierEndDate, true)};
+            var taskComplSrc = new TaskCompletionSource<IEnumerable<T>>();
+            var healthKitType = healthDataType.ToHealthKit();
+            var quantityType = HKQuantityType.Create(healthKitType.TypeIdentifier);
+            var predicate = HKQuery.GetPredicateForSamples((NSDate) startDate, (NSDate) endDate, HKQueryOptions.StrictStartDate);
 
-            if (aggregateTime != AggregateTime.None && aggregateType != AggregateType.None)
+            if (aggregateTime != AggregateTime.None)
             {
                 var anchor   = NSCalendar.CurrentCalendar.DateBySettingsHour(0, 0, 0, NSDate.Now, NSCalendarOptions.None);
                 var interval = new NSDateComponents();
@@ -103,12 +100,12 @@ namespace Plugin.Health
                 {
                     InitialResultsHandler = (collectionQuery, results, error) =>
                     {
-                        var healthData = results.Statistics.Select(result => new HealthData
+                        var healthData = results.Statistics.Select(result => new AggregatedHealthData
                         {
-                            StartDate   = (DateTime) result.StartDate,
-                            EndDate     = (DateTime) result.EndDate,
-                            Value       = result.SumQuantity().GetDoubleValue(healthKitType.Unit),
-                        }).ToList();
+                            StartDate = (DateTime) result.StartDate,
+                            EndDate   = (DateTime) result.EndDate,
+                            Max       = result.SumQuantity().GetDoubleValue(healthKitType.Unit),
+                        } as T);
 
                         taskComplSrc.SetResult(healthData);
                     }
@@ -118,7 +115,9 @@ namespace Plugin.Health
             }
             else
             {
-                var query = new HKSampleQuery(quantityType, predicate, HKSampleQuery.NoLimit, sortDescriptor,
+                var sortDescriptor = new[] {new NSSortDescriptor(HKSample.SortIdentifierEndDate, true)};
+                var query = new HKSampleQuery(HKQuantityType.Create(healthKitType.TypeIdentifier), predicate,
+                    HKSampleQuery.NoLimit, sortDescriptor,
                     (resultQuery, results, error) =>
                     {
                         var healthData = results?.Select(result => new HealthData
@@ -127,7 +126,7 @@ namespace Plugin.Health
                             EndDate     = (DateTime) result.EndDate,
                             Value       = ReadValue(result, healthKitType.Unit),
                             UserEntered = result.Metadata?.WasUserEntered ?? false
-                        }).ToList();
+                        } as T);
 
                         taskComplSrc.SetResult(healthData);
                     });

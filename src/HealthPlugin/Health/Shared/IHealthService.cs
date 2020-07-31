@@ -19,7 +19,7 @@ namespace Plugin.Health
         Task<bool> RequestPermissionAsync(params HealthDataType[] dataTypes);
 
         /// <summary>
-        /// Instantiate de DataReader for HealthKit/GoogleFit
+        /// Instantiate the DataReader for HealthKit/GoogleFit
         /// </summary>
         /// <returns></returns>
         IHealthDataReader DataReader();

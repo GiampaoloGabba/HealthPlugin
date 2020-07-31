@@ -1,38 +1,15 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
+ using System.Linq;
+ using System.Threading.Tasks;
 
 namespace Plugin.Health
 {
     public abstract class HealthDataReaderBase : IHealthDataReader
     {
-        private readonly Dictionary<HealthDataType, AggregateType> _selectedDataTypes = new Dictionary<HealthDataType, AggregateType>();
-        private AggregateTime _aggregateTime = AggregateTime.None;
         private DateTime _startDate = DateTime.Today;
         private DateTime _endDate   = DateTime.Now;
-
-        public async Task<IReadOnlyDictionary<HealthDataType, IEnumerable<HealthData>>> FetchDataAsync()
-        {
-            var dic = new Dictionary<HealthDataType, IEnumerable<HealthData>>();
-
-            if (dic.Count == 0)
-                throw new InvalidOperationException("No DataTypes specified! Please use .AddDataType before calling .FetchDataAsync");
-
-            foreach (var data in _selectedDataTypes)
-            {
-                dic.Add(data.Key, await QueryAsync(data.Key, data.Value, _aggregateTime, _startDate, _endDate).ConfigureAwait(false));
-            }
-
-            return new ReadOnlyDictionary<HealthDataType, IEnumerable<HealthData>>(dic);
-        }
-
-        public IHealthDataReader AddDataType(HealthDataType healthDataType, AggregateType aggregateType)
-        {
-            if (!_selectedDataTypes.ContainsKey(healthDataType))
-                _selectedDataTypes.Add(healthDataType, aggregateType);
-            return this;
-        }
 
         public IHealthDataReader DateRange(DateTime startDate, DateTime endDate)
         {
@@ -41,16 +18,29 @@ namespace Plugin.Health
             return this;
         }
 
-        public IHealthDataReader Aggregate(AggregateTime aggregateTime)
+        public IReadOnlyDictionary<HealthDataType, Task<IEnumerable<HealthData>>> FetchData(params HealthDataType[] healthDataTypes)
         {
-            _aggregateTime = aggregateTime;
-            return this;
+            return Read<HealthData>(AggregateTime.None,healthDataTypes);
         }
 
-        protected abstract Task<IEnumerable<HealthData>> QueryAsync(HealthDataType dataTypes,
-                                                                    AggregateType aggregateType,
-                                                                    AggregateTime aggregateTime,
-                                                                    DateTime startDate, DateTime endDate);
+        public IReadOnlyDictionary<HealthDataType, Task<IEnumerable<AggregatedHealthData>>> AggregateData(AggregateTime aggregateTime,params HealthDataType[] healthDataTypes)
+        {
+            return Read<AggregatedHealthData>(aggregateTime,healthDataTypes);
+        }
 
+        private IReadOnlyDictionary<HealthDataType, Task<IEnumerable<T>>> Read<T>(AggregateTime aggregateTime,params HealthDataType[] healthDataTypes) where T : class, IHealthData
+        {
+            if (healthDataTypes == null || healthDataTypes.Length == 0)
+                throw new InvalidOperationException("No DataTypes specified! Please use .AddDataType before calling .FetchDataAsync");
+
+            var dic = healthDataTypes.ToDictionary(dataType => dataType,
+                dataType => Query<T>(dataType, aggregateTime, _startDate, _endDate));
+
+            return new ReadOnlyDictionary<HealthDataType, Task<IEnumerable<T>>>(dic);
+        }
+
+        protected abstract Task<IEnumerable<T>> Query<T>(HealthDataType dataTypes,
+                                                                   AggregateTime aggregateTime,
+                                                                   DateTime startDate, DateTime endDate) where T: class, IHealthData;
     }
 }

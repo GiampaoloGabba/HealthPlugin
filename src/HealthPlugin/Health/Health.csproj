@@ -74,6 +74,7 @@
         <Compile Include="Shared\Infrastructure\PreserveAttribute.cs">
           <SubType>Code</SubType>
         </Compile>
+        <Compile Include="Shared\Models\Enum.cs" />
         <Compile Include="Shared\Models\HealthData.cs">
           <SubType>Code</SubType>
         </Compile>

@@ -52,9 +52,13 @@ namespace Plugin.Health
                               .SetTimeRange(startTime, endTime, TimeUnit.Milliseconds)
                               .EnableServerQueries();
 
-            if (aggregateTime != AggregateTime.None && googleFitData.AggregateTypeIdentifier != null)
+            var aggregationList = DataType.GetAggregatesForInput(googleFitData.TypeIdentifier);
+
+
+            if (aggregateTime != AggregateTime.None && aggregateType != AggregateType.None
+                                                    && aggregationList.Any())
             {
-                readBuilder.Aggregate(googleFitDataType, googleFitData.AggregateTypeIdentifier);
+                readBuilder.Aggregate(googleFitDataType, aggregationList.FirstOrDefault());
 
                 switch (aggregateTime)
                 {

@@ -15,21 +15,13 @@ namespace Plugin.Health
         IHealthDataReader DateRange(DateTime startDate, DateTime endDate);
 
         /// <summary>
-        /// Activate data aggregation in HealthKit/GoogleFit query
-        /// </summary>
-        /// <param name="aggregateTime">Time unit for the aggregaton</param>
-        IHealthDataReader Aggregate(AggregateTime aggregateTime);
-
-        /// <summary>
-        /// Add HealthDataTypes to the data query
-        /// </summary>
-        /// <param name="healthDataType">HealthDataType to query</param>
-        /// <param name="aggregateType">Aggregation Options (ignored if Aggregate is not set)</param>
-        IHealthDataReader AddDataType(HealthDataType healthDataType, AggregateType aggregateType = AggregateType.None);
-
-        /// <summary>
         /// Fetch data from HealthKit/Google fit
         /// </summary>
-        Task<IReadOnlyDictionary<HealthDataType, IEnumerable<HealthData>>> FetchDataAsync();
+        IReadOnlyDictionary<HealthDataType, Task<IEnumerable<HealthData>>> FetchData(params HealthDataType[] healthDataType);
+
+        /// <summary>
+        /// Fetch aggregated data from HealthKit/Google fit
+        /// </summary>
+        IReadOnlyDictionary<HealthDataType, Task<IEnumerable<AggregatedHealthData>>> AggregateData(AggregateTime aggregateTime, params HealthDataType[] healthDataType);
     }
 }
