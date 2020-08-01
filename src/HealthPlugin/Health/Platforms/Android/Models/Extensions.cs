@@ -13,25 +13,27 @@ namespace Plugin.Health
                 case HealthDataType.StepCount:
                     return new GoogleFitData
                     {
-                        TypeIdentifier          = DataType.TypeStepCountDelta,
-                        AggregateTypeIdentifier = DataType.AggregateStepCountDelta,
-                        Unit                    = Field.FieldSteps,
+                        TypeIdentifier = DataType.TypeStepCountDelta,
+                        AggregateType  = DataType.AggregateStepCountDelta,
+                        Cumulative     = true,
+                        Unit           = Field.FieldSteps,
                     };
 
                 case HealthDataType.Distance:
                     return new GoogleFitData
                     {
-                        TypeIdentifier          = DataType.TypeDistanceDelta,
-                        AggregateTypeIdentifier = DataType.AggregateDistanceDelta,
-                        Unit                    = Field.FieldDistance,
+                        TypeIdentifier = DataType.TypeDistanceDelta,
+                        AggregateType  = DataType.AggregateDistanceDelta,
+                        Cumulative     = true,
+                        Unit           = Field.FieldDistance,
                     };
 
                 case HealthDataType.HeartRate:
                     return new GoogleFitData
                     {
-                        TypeIdentifier          = DataType.TypeHeartRateBpm,
-                        AggregateTypeIdentifier = DataType.AggregateHeartRateSummary,
-                        Unit                    = Field.FieldBpm,
+                        TypeIdentifier = DataType.TypeHeartRateBpm,
+                        AggregateType  = DataType.AggregateHeartRateSummary,
+                        Unit           = Field.FieldBpm,
                     };
                 default:
                     throw new ArgumentOutOfRangeException();

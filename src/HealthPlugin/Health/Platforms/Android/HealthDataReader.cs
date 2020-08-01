@@ -33,32 +33,26 @@ namespace Plugin.Health
             _currentActivity = healthService.CurrentActivity;
         }
 
-        protected override async Task<IEnumerable<HealthData>> QueryAsync(HealthDataType healthDataType,
-                                                                          AggregateType aggregateType,
-                                                                          AggregateTime aggregateTime,
-                                                                          DateTime startDate, DateTime endDate)
+        protected override async Task<IEnumerable<T>> Query<T>(HealthDataType healthDataType,
+                                                               AggregateTime aggregateTime,
+                                                               DateTime startDate, DateTime endDate)
         {
             var authorized = _healthService.HasOAuthPermission(_healthService.GetFitnessOptions(healthDataType));
 
             if (!authorized)
                 throw new UnauthorizedAccessException($"Not enough permissions to request {healthDataType}");
 
-            var googleFitData     = healthDataType.ToGoogleFit();
-            var googleFitDataType = googleFitData.TypeIdentifier;
-            var startTime         = startDate.ToJavaTimeStamp();
-            var endTime           = endDate.ToJavaTimeStamp();
+            var  fitData   = healthDataType.ToGoogleFit();
+            long startTime = startDate.ToJavaTimeStamp();
+            long endTime   = endDate.ToJavaTimeStamp();
 
             var readBuilder = new DataReadRequest.Builder()
                               .SetTimeRange(startTime, endTime, TimeUnit.Milliseconds)
                               .EnableServerQueries();
 
-            var aggregationList = DataType.GetAggregatesForInput(googleFitData.TypeIdentifier);
-
-
-            if (aggregateTime != AggregateTime.None && aggregateType != AggregateType.None
-                                                    && aggregationList.Any())
+            if (aggregateTime != AggregateTime.None)
             {
-                readBuilder.Aggregate(googleFitDataType, aggregationList.FirstOrDefault());
+                readBuilder.Aggregate(fitData.TypeIdentifier, fitData.AggregateType);
 
                 switch (aggregateTime)
                 {
@@ -89,7 +83,7 @@ namespace Plugin.Health
             }
             else
             {
-                readBuilder.Read(googleFitDataType);
+                readBuilder.Read(fitData.TypeIdentifier);
             }
 
             var readRequest = readBuilder.Build();
@@ -98,38 +92,57 @@ namespace Plugin.Health
                                              .ReadDataAsync(readRequest).ConfigureAwait(false);
 
             if (response == null)
-                return new List<HealthData>();
+                return new List<T>();
 
             if (response.Buckets.Any())
             {
-                var output = new List<HealthData>();
+                var output = new List<T>();
                 foreach (var bucket in response.Buckets)
                 {
                     foreach (var dataSet in bucket.DataSets)
                     {
-                        output.AddRange(dataSet.DataPoints.Select(result => CreateHealthData(result, googleFitData.Unit)));
+                        output.AddRange((IEnumerable<T>) dataSet.DataPoints.Select(result =>
+                            CreateHealthData(result, fitData.Unit, fitData.Cumulative)));
                     }
                 }
 
                 return output;
             }
 
-            return response.GetDataSet(googleFitDataType)?.DataPoints?
-                .Select(result => CreateHealthData(result, googleFitData.Unit)).ToList();
+            return (IEnumerable<T>) response.GetDataSet(fitData.TypeIdentifier)?.DataPoints?
+                .Select(result => CreateHealthData(result, fitData.Unit, true)).ToList();
         }
 
-        HealthData CreateHealthData(DataPoint dataPoint, Field unit)
+        IHealthData CreateHealthData(DataPoint dataPoint, Field unit, bool cumulative)
         {
-            return new HealthData
+            IHealthData hData;
+
+            if (cumulative)
             {
-                StartDate   = dataPoint.GetStartTime(TimeUnit.Milliseconds).ToDateTime(),
-                EndDate     = dataPoint.GetEndTime(TimeUnit.Milliseconds).ToDateTime(),
-                Value       = ReadValue(dataPoint, unit),
-                UserEntered = dataPoint.OriginalDataSource?.StreamName == "user_input"
-            };
+                hData = new AggregatedHealthData
+                {
+                    StartDate = dataPoint.GetStartTime(TimeUnit.Milliseconds).ToDateTime(),
+                    EndDate   = dataPoint.GetEndTime(TimeUnit.Milliseconds).ToDateTime(),
+                    Min       = ReadValue(dataPoint, Field.FieldMin),
+                    Max       = ReadValue(dataPoint, Field.FieldMax),
+                    Average   = ReadValue(dataPoint, Field.FieldAverage)
+                };
+            }
+            else
+            {
+                hData = new HealthData
+                {
+                    StartDate   = dataPoint.GetStartTime(TimeUnit.Milliseconds).ToDateTime(),
+                    EndDate     = dataPoint.GetEndTime(TimeUnit.Milliseconds).ToDateTime(),
+                    Value       = ReadValue(dataPoint, unit) ?? 0,
+                    UserEntered = dataPoint.OriginalDataSource?.StreamName == "user_input"
+                };
+            }
+
+            return hData;
         }
 
-        double ReadValue(DataPoint dataPoint, Field unit)
+        double? ReadValue(DataPoint dataPoint, Field unit)
         {
             try
             {
@@ -152,7 +165,7 @@ namespace Plugin.Health
                     catch (Exception e3)
                     {
                         Debug.WriteLine(e3,"GoogleFit - Unable to convert datatype format");
-                        return 0;
+                        return null;
                     }
                 }
             }

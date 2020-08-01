@@ -4,9 +4,10 @@ namespace Plugin.Health
 {
     internal class GoogleFitData
     {
-        public DataType TypeIdentifier          { get; set; }
-        public DataType AggregateTypeIdentifier { get; set; }
-        public Field    Unit                    { get; set; }
+        public DataType TypeIdentifier { get; set; }
+        public DataType AggregateType  { get; set; }
+        public bool     Cumulative     { get; set; }
+        public Field    Unit           { get; set; }
 
     }
 }
