@@ -20,6 +20,11 @@ namespace Plugin.Health
                 Debug.WriteLine("HEALTHKIT is not available on this device!");
         }
 
+        public override bool IsAvailable()
+        {
+            return HKHealthStore.IsHealthDataAvailable;
+        }
+
         public override bool IsDataTypeAvailable(HealthDataType healthDataType)
         {
             try
@@ -56,6 +61,13 @@ namespace Plugin.Health
         public override IHealthDataReader DataReader()
         {
             return new HealthDataReader(this);
+        }
+
+        public override void PromptInstallGoogleFit()
+        {
+            //Do nothing
+            //Consider if we should throw an exception....
+            //throw new NotImplementedException();
         }
 
         NSSet DataTypesToRead(HealthDataType[] dataTypes)

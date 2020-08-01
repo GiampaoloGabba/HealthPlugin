@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.Gms.Auth.Api.SignIn;
+using Android.Gms.Common;
 using Android.Gms.Fitness;
 using Plugin.CurrentActivity;
 using Debug = System.Diagnostics.Debug;
@@ -26,6 +28,37 @@ namespace Plugin.Health
         Context _currentContext => CrossCurrentActivity.Current.AppContext;
         const int REQUEST_CODE = 1;
         static TaskCompletionSource<bool> _tcsAuth;
+
+        // detects if a) Google APIs are available, b) Google Fit is actually installed
+        public override bool IsAvailable() {
+            // first check that the Google APIs are available
+            var gapi      = GoogleApiAvailability.Instance;
+            int apiresult = gapi.IsGooglePlayServicesAvailable(_currentContext);
+            return apiresult == ConnectionResult.Success && IsGooglefitInstalled();
+        }
+
+        public override void PromptInstallGoogleFit()
+        {
+            try {
+                CurrentActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse("market://details?id=com.google.android.apps.fitness")));
+            } catch (ActivityNotFoundException e) {
+                CurrentActivity.StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse("https://play.google.com/store/apps/details?id=com.google.android.apps.fitness")));
+            }
+        }
+
+        private bool IsGooglefitInstalled()
+        {
+            // then check that Google Fit is actually installed
+            var pm = _currentContext.PackageManager;
+            try {
+                pm.GetPackageInfo("com.google.android.apps.fitness", PackageInfoFlags.Activities);
+                return true;
+            } catch (PackageManager.NameNotFoundException e) {
+                Debug.WriteLine("Google Fit not installed");
+            }
+
+            return false;
+        }
 
         public override bool IsDataTypeAvailable(HealthDataType healthDataType)
         {

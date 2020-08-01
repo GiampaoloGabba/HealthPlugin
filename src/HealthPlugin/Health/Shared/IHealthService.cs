@@ -6,6 +6,12 @@ namespace Plugin.Health
     public interface IHealthService
     {
         /// <summary>
+        /// Check is HealthKit/Googlefit are available
+        /// </summary>
+        /// <returns></returns>
+        bool IsAvailable();
+
+        /// <summary>
         /// Check if the HealthDataType is supported by the platform
         /// </summary>
         /// <param name="healthDataType">HealthDataType to check</param>
@@ -23,5 +29,8 @@ namespace Plugin.Health
         /// </summary>
         /// <returns></returns>
         IHealthDataReader DataReader();
+
+        //Platforms
+        void PromptInstallGoogleFit();
     }
 }
