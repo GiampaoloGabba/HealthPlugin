@@ -19,8 +19,8 @@ namespace Plugin.Health
         }
 
         protected override Task<IEnumerable<T>> Query<T>(HealthDataType healthDataType,
-                                                        AggregateTime aggregateTime,
-                                                        DateTime startDate, DateTime endDate)
+                                                         AggregateTime aggregateTime,
+                                                         DateTime startDate, DateTime endDate)
         {
             if (_healthStore == null || !HKHealthStore.IsHealthDataAvailable)
                 throw new NotSupportedException("HealthKit data is not available on this device");
@@ -69,43 +69,45 @@ namespace Plugin.Health
 
                 HKStatisticsOptions hkStatisticsOptions;
 
-                switch (aggregateType)
+                if (healthKitType.Cumulative)
                 {
-                    case AggregateType.CumulativeSum:
-                        hkStatisticsOptions = healthKitType.NegateCumulativeSum == false
-                                                  ? HKStatisticsOptions.CumulativeSum
-                                                  : healthKitType.DefaultStatisticOption;
-                        break;
-
-                    case AggregateType.Average:
-                        hkStatisticsOptions = HKStatisticsOptions.DiscreteAverage;
-                        break;
-
-                    case AggregateType.Min:
-                        hkStatisticsOptions = HKStatisticsOptions.DiscreteMin;
-                        break;
-
-                    case AggregateType.Max:
-                        hkStatisticsOptions = HKStatisticsOptions.DiscreteMax;
-                        break;
-
-                    default:
-                        hkStatisticsOptions = healthKitType.DefaultStatisticOption;
-                        break;
+                    hkStatisticsOptions = HKStatisticsOptions.CumulativeSum;
                 }
-
+                else
+                {
+                    hkStatisticsOptions = HKStatisticsOptions.DiscreteAverage |
+                                          HKStatisticsOptions.DiscreteMax |
+                                          HKStatisticsOptions.DiscreteMax;
+                }
 
                 var queryAggregate = new HKStatisticsCollectionQuery(quantityType, predicate, hkStatisticsOptions,
                     anchor, interval)
                 {
                     InitialResultsHandler = (collectionQuery, results, error) =>
                     {
-                        var healthData = results.Statistics.Select(result => new AggregatedHealthData
+                        var healthData = new List<T>();
+
+                        foreach (var result in results.Statistics)
                         {
-                            StartDate = (DateTime) result.StartDate,
-                            EndDate   = (DateTime) result.EndDate,
-                            Max       = result.SumQuantity().GetDoubleValue(healthKitType.Unit),
-                        } as T);
+                            var hData = new AggregatedHealthData
+                            {
+                                StartDate = (DateTime) result.StartDate,
+                                EndDate   = (DateTime) result.EndDate,
+                            };
+
+                            if (healthKitType.Cumulative)
+                            {
+                                hData.Sum = result.SumQuantity().GetDoubleValue(healthKitType.Unit);
+                            }
+                            else
+                            {
+                                hData.Min = result.MinimumQuantity().GetDoubleValue(healthKitType.Unit);
+                                hData.Max = result.MaximumQuantity().GetDoubleValue(healthKitType.Unit);
+                                hData.Average = result.AverageQuantity().GetDoubleValue(healthKitType.Unit);
+                            }
+
+                            healthData.Add(hData as T);
+                        }
 
                         taskComplSrc.SetResult(healthData);
                     }

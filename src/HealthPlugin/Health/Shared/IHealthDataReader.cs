@@ -17,11 +17,11 @@ namespace Plugin.Health
         /// <summary>
         /// Fetch data from HealthKit/Google fit
         /// </summary>
-        IReadOnlyDictionary<HealthDataType, Task<IEnumerable<HealthData>>> FetchData(params HealthDataType[] healthDataType);
+        IReadOnlyDictionary<HealthDataType, Task<IEnumerable<HealthData>>> Read(params HealthDataType[] healthDataType);
 
         /// <summary>
         /// Fetch aggregated data from HealthKit/Google fit
         /// </summary>
-        IReadOnlyDictionary<HealthDataType, Task<IEnumerable<AggregatedHealthData>>> AggregateData(AggregateTime aggregateTime, params HealthDataType[] healthDataType);
+        IReadOnlyDictionary<HealthDataType, Task<IEnumerable<AggregatedHealthData>>> ReadAggregate(AggregateTime aggregateTime, params HealthDataType[] healthDataType);
     }
 }
