@@ -18,17 +18,17 @@ namespace Plugin.Health
             return this;
         }
 
-        public IReadOnlyDictionary<HealthDataType, Task<IEnumerable<HealthData>>> FetchData(params HealthDataType[] healthDataTypes)
+        public IReadOnlyDictionary<HealthDataType, Task<IEnumerable<HealthData>>> Read(params HealthDataType[] healthDataTypes)
         {
-            return Read<HealthData>(AggregateTime.None,healthDataTypes);
+            return FetchData<HealthData>(AggregateTime.None,healthDataTypes);
         }
 
-        public IReadOnlyDictionary<HealthDataType, Task<IEnumerable<AggregatedHealthData>>> AggregateData(AggregateTime aggregateTime,params HealthDataType[] healthDataTypes)
+        public IReadOnlyDictionary<HealthDataType, Task<IEnumerable<AggregatedHealthData>>> ReadAggregate(AggregateTime aggregateTime,params HealthDataType[] healthDataTypes)
         {
-            return Read<AggregatedHealthData>(aggregateTime,healthDataTypes);
+            return FetchData<AggregatedHealthData>(aggregateTime,healthDataTypes);
         }
 
-        private IReadOnlyDictionary<HealthDataType, Task<IEnumerable<T>>> Read<T>(AggregateTime aggregateTime,params HealthDataType[] healthDataTypes) where T : class, IHealthData
+        private IReadOnlyDictionary<HealthDataType, Task<IEnumerable<T>>> FetchData<T>(AggregateTime aggregateTime,params HealthDataType[] healthDataTypes) where T : class, IHealthData
         {
             if (healthDataTypes == null || healthDataTypes.Length == 0)
                 throw new InvalidOperationException("No DataTypes specified! Please use .AddDataType before calling .FetchDataAsync");
