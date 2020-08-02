@@ -6,6 +6,9 @@ namespace Plugin.Health
 {
     internal static class Extensions
     {
+        //TODO: come gestire active+basal per calorie?
+        //TODO: TYPE_CALORIES_EXPENDED = (TYPE_CALORIES_EXPENDED - (TYPE_BASAL_METABOLIC_RATE * time window))+ (TYPE_BASAL_METABOLIC_RATE * time window)
+
         internal static GoogleFitData ToGoogleFit(this HealthDataType healthDataType)
         {
             switch (healthDataType)
@@ -15,8 +18,8 @@ namespace Plugin.Health
                     {
                         TypeIdentifier = DataType.TypeStepCountDelta,
                         AggregateType  = DataType.AggregateStepCountDelta,
-                        Cumulative     = true,
                         Unit           = Field.FieldSteps,
+                        Cumulative     = true
                     };
 
                 case HealthDataType.Distance:
@@ -24,8 +27,8 @@ namespace Plugin.Health
                     {
                         TypeIdentifier = DataType.TypeDistanceDelta,
                         AggregateType  = DataType.AggregateDistanceDelta,
-                        Cumulative     = true,
                         Unit           = Field.FieldDistance,
+                        Cumulative     = true
                     };
 
                 case HealthDataType.HeartRate:
@@ -33,8 +36,109 @@ namespace Plugin.Health
                     {
                         TypeIdentifier = DataType.TypeHeartRateBpm,
                         AggregateType  = DataType.AggregateHeartRateSummary,
-                        Unit           = Field.FieldBpm,
+                        Unit           = Field.FieldBpm
                     };
+
+                case HealthDataType.Height:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier = DataType.TypeHeight,
+                        AggregateType  = DataType.AggregateHeightSummary,
+                        Unit           = Field.FieldHeight
+                    };
+
+                case HealthDataType.Weight:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier = DataType.TypeWeight,
+                        AggregateType  = DataType.AggregateWeightSummary,
+                        Unit           = Field.FieldWeight
+                    };
+
+                case HealthDataType.Energy:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier = DataType.TypeCaloriesExpended,
+                        AggregateType  = DataType.AggregateCaloriesExpended,
+                        Unit           = Field.FieldCalories,
+                        Cumulative     = true
+                    };
+
+                case HealthDataType.Water:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier = DataType.TypeHydration,
+                        AggregateType  = DataType.AggregateHydration,
+                        Unit           = Field.FieldVolume,
+                        Cumulative     = true
+                    };
+
+                case HealthDataType.BodyFat:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier = DataType.TypeBodyFatPercentage,
+                        AggregateType  = DataType.TypeBodyFatPercentage,
+                        Unit           = Field.FieldPercentage
+                    };
+
+                case HealthDataType.ActiveEnergyBurned:
+                    return new GoogleFitData
+                    {
+                        //TypeIdentifier = DataType, //TODO: quale datatype
+                        //AggregateType  = DataType, //TODO: quale datatype
+                        // Unit           = Field //TODO: quale unit?
+                    };
+
+                case HealthDataType.BodyTemperature:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier = HealthDataTypes.TypeBodyTemperature,
+                        AggregateType  = HealthDataTypes.AggregateBodyTemperatureSummary,
+                        Unit           = HealthFields.FieldBodyTemperature,
+                        Cumulative     = true
+                    };
+
+                case HealthDataType.BloodPressureSystolic:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier  = HealthDataTypes.TypeBloodPressure,
+                        AggregateType   = HealthDataTypes.AggregateBloodPressureSummary,
+                        Unit            = HealthFields.FieldBloodPressureSystolic,
+                        MinOverride     = HealthFields.FieldBloodPressureSystolicMin,
+                        MaxOverride     = HealthFields.FieldBloodPressureSystolicMax,
+                        AverageOverride = HealthFields.FieldBloodPressureSystolicAverage,
+                    };
+
+                case HealthDataType.BloodPressureDiastolic:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier  = HealthDataTypes.TypeBloodPressure,
+                        AggregateType   = HealthDataTypes.AggregateBloodPressureSummary,
+                        Unit            = HealthFields.FieldBloodPressureDiastolic,
+                        MinOverride     = HealthFields.FieldBloodPressureDiastolicMin,
+                        MaxOverride     = HealthFields.FieldBloodPressureDiastolicMax,
+                        AverageOverride = HealthFields.FieldBloodPressureDiastolicAverage,
+                    };
+
+                case HealthDataType.BloodOxygen:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier  = HealthDataTypes.TypeOxygenSaturation,
+                        AggregateType   = HealthDataTypes.AggregateOxygenSaturationSummary,
+                        Unit            = HealthFields.FieldOxygenSaturation,
+                        MinOverride     = HealthFields.FieldOxygenSaturationMin,
+                        MaxOverride     = HealthFields.FieldOxygenSaturationMax,
+                        AverageOverride = HealthFields.FieldOxygenSaturationAverage,
+                    };
+
+                case HealthDataType.BloodGlucose:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier = HealthDataTypes.TypeBloodGlucose,
+                        AggregateType  = HealthDataTypes.AggregateBloodGlucoseSummary,
+                        Unit           = HealthFields.FieldBloodGlucoseLevel,
+                    };
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -9,5 +9,9 @@ namespace Plugin.Health
         public bool     Cumulative     { get; set; }
         public Field    Unit           { get; set; }
 
+        public Field MinOverride     { get; set; }
+        public Field MaxOverride     { get; set; }
+        public Field AverageOverride { get; set; }
+
     }
 }
