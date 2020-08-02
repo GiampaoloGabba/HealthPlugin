@@ -23,6 +23,13 @@ namespace Plugin.Health
         //aggregation: https://github.com/dariosalvi78/cordova-plugin-health/blob/master/src/android/HealthPlugin.java
         //datatypes: https://developers.google.com/android/reference/com/google/android/gms/fitness/data/DataType#TYPE_STEP_COUNT_DELTA
 
+        //TODO: verificare bucstom buckets (standard sono ora e giorno)
+        //TODO: verificare lettura datatypes se richiede eccezioni
+        //TODO: inserire tutti i datatypes supportati
+        //TODO: esplorare store e delete
+        //TODO: esplorare attività
+        //TODO: esplorare sessioni
+
         internal Activity CurrentActivity => CrossCurrentActivity.Current.Activity ??
                               throw new NullReferenceException("Please call HealthService.Init() method in the platform specific project to use Health Plugin");
         Context _currentContext => CrossCurrentActivity.Current.AppContext;

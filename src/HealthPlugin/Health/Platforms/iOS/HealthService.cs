@@ -10,6 +10,12 @@ namespace Plugin.Health
     [Preserve(AllMembers = true)]
     public class HealthService : HealthServiceBase
     {
+        //https://github.com/EddyVerbruggen/HealthKit
+        
+        //TODO: esplorare store e delete
+        //TODO: esplorare attività
+        //TODO: esplorare sessioni
+
         protected internal readonly HKHealthStore HealthStore;
 
         public HealthService()
