@@ -22,7 +22,6 @@
         Energy,
         Water,
         BodyFat,
-        BodyMassIndex,
         ActiveEnergyBurned,
         BodyTemperature,
         BloodPressureSystolic,
@@ -30,6 +29,7 @@
         BloodOxygen,
         BloodGlucose,
 
+        iOS_BodyMassIndex,
         iOS_WalkingHeartRate,
         iOS_RestingHeartRate,
         iOS_BasalEnergyBurned,

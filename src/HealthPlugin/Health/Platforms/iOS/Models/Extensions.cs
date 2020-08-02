@@ -12,6 +12,9 @@ namespace Plugin.Health
         //More info on datatype:
         //https://github.com/dariosalvi78/cordova-plugin-health
 
+        //TODO: come gestire active+basal per calorie?
+        //TODO: HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned
+
         internal static HealthKitData ToHealthKit(this HealthDataType healthDataType)
         {
             switch (healthDataType)
@@ -38,21 +41,21 @@ namespace Plugin.Health
                     return new HealthKitData
                     {
                         Unit           = HKUnit.Count.UnitDividedBy(HKUnit.Minute),
-                        TypeIdentifier = HKQuantityTypeIdentifier.HeartRate,
+                        TypeIdentifier = HKQuantityTypeIdentifier.HeartRate
                     };
 
                 case HealthDataType.Height:
                     return new HealthKitData
                     {
                         Unit           = HKUnit.Meter,
-                        TypeIdentifier = HKQuantityTypeIdentifier.Height,
+                        TypeIdentifier = HKQuantityTypeIdentifier.Height
                     };
 
                 case HealthDataType.Weight:
                     return new HealthKitData
                     {
                         Unit           = HKUnit.Gram,
-                        TypeIdentifier = HKQuantityTypeIdentifier.BodyMass,
+                        TypeIdentifier = HKQuantityTypeIdentifier.BodyMass
                     };
 
                 case HealthDataType.Energy:
@@ -75,14 +78,7 @@ namespace Plugin.Health
                     return new HealthKitData
                     {
                         Unit           = HKUnit.Percent,
-                        TypeIdentifier = HKQuantityTypeIdentifier.BodyFatPercentage,
-                    };
-
-                case HealthDataType.BodyMassIndex:
-                    return new HealthKitData
-                    {
-                        Unit           = HKUnit.FromString(""),
-                        TypeIdentifier = HKQuantityTypeIdentifier.BodyMassIndex,
+                        TypeIdentifier = HKQuantityTypeIdentifier.BodyFatPercentage
                     };
 
                 case HealthDataType.ActiveEnergyBurned:
@@ -97,51 +93,59 @@ namespace Plugin.Health
                     return new HealthKitData
                     {
                         Unit           = HKUnit.DegreeCelsius,
-                        TypeIdentifier = HKQuantityTypeIdentifier.BodyTemperature,
+                        TypeIdentifier = HKQuantityTypeIdentifier.BodyTemperature
                     };
 
                 case HealthDataType.BloodPressureSystolic:
                     return new HealthKitData
                     {
                         Unit           = HKUnit.MillimeterOfMercury,
-                        TypeIdentifier = HKQuantityTypeIdentifier.BloodPressureSystolic,
+                        TypeIdentifier = HKQuantityTypeIdentifier.BloodPressureSystolic
                     };
 
                 case HealthDataType.BloodPressureDiastolic:
                     return new HealthKitData
                     {
                         Unit           = HKUnit.MillimeterOfMercury,
-                        TypeIdentifier = HKQuantityTypeIdentifier.BloodPressureDiastolic,
+                        TypeIdentifier = HKQuantityTypeIdentifier.BloodPressureDiastolic
                     };
 
                 case HealthDataType.BloodOxygen:
                     return new HealthKitData
                     {
                         Unit           = HKUnit.Percent,
-                        TypeIdentifier = HKQuantityTypeIdentifier.OxygenSaturation,
+                        TypeIdentifier = HKQuantityTypeIdentifier.OxygenSaturation
                     };
 
                 case HealthDataType.BloodGlucose:
                     return new HealthKitData
                     {
                         Unit           = HKUnit.FromString("mg/dl"),
-                        TypeIdentifier = HKQuantityTypeIdentifier.BloodGlucose,
+                        TypeIdentifier = HKQuantityTypeIdentifier.BloodGlucose
                     };
 
                 // IOS SPECIFIC
+
+
+                case HealthDataType.iOS_BodyMassIndex:
+                    return new HealthKitData
+                    {
+                        Unit           = HKUnit.FromString(""),
+                        TypeIdentifier = HKQuantityTypeIdentifier.BodyMassIndex
+                    };
 
                 case HealthDataType.iOS_WalkingHeartRate:
                     return new HealthKitData
                     {
                         Unit           = HKUnit.Count.UnitDividedBy(HKUnit.Minute),
-                        TypeIdentifier = HKQuantityTypeIdentifier.WalkingHeartRateAverage,
+                        TypeIdentifier = HKQuantityTypeIdentifier.WalkingHeartRateAverage
                     };
 
                 case HealthDataType.iOS_RestingHeartRate:
                     return new HealthKitData
                     {
                         Unit           = HKUnit.Count.UnitDividedBy(HKUnit.Minute),
-                        TypeIdentifier = HKQuantityTypeIdentifier.RestingHeartRate,
+                        TypeIdentifier = HKQuantityTypeIdentifier.RestingHeartRate
                     };
 
                 case HealthDataType.iOS_BasalEnergyBurned:
@@ -156,7 +160,7 @@ namespace Plugin.Health
                     return new HealthKitData
                     {
                         Unit           = HKUnit.Meter,
-                        TypeIdentifier = HKQuantityTypeIdentifier.WaistCircumference,
+                        TypeIdentifier = HKQuantityTypeIdentifier.WaistCircumference
                     };
 
                 case HealthDataType.iOS_StandTime:
