@@ -58,13 +58,29 @@ namespace Plugin.Health
                         TypeIdentifier = HKQuantityTypeIdentifier.BodyMass
                     };
 
-                case HealthDataType.Energy:
+                case HealthDataType.Calories:
                     return new HealthKitData
                     {
                         Unit           = HKUnit.Kilocalorie,
                         TypeIdentifier = HKQuantityTypeIdentifier.ActiveEnergyBurned,
                         Cumulative     = true
                     };
+
+                case HealthDataType.CaloriesActive:
+                    return new HealthKitData
+                    {
+                        Unit           = HKUnit.Kilocalorie,
+                        TypeIdentifier = HKQuantityTypeIdentifier.ActiveEnergyBurned,
+                        Cumulative     = true
+                    };
+
+                /*case HealthDataType.CaloriesBasal:
+                    return new HealthKitData
+                    {
+                        Unit           = HKUnit.Kilocalorie,
+                        TypeIdentifier = HKQuantityTypeIdentifier.BasalEnergyBurned,
+                        Cumulative     = true
+                    };*/
 
                 case HealthDataType.Water:
                     return new HealthKitData
@@ -79,14 +95,6 @@ namespace Plugin.Health
                     {
                         Unit           = HKUnit.Percent,
                         TypeIdentifier = HKQuantityTypeIdentifier.BodyFatPercentage
-                    };
-
-                case HealthDataType.ActiveEnergyBurned:
-                    return new HealthKitData
-                    {
-                        Unit           = HKUnit.Kilocalorie,
-                        TypeIdentifier = HKQuantityTypeIdentifier.ActiveEnergyBurned,
-                        Cumulative     = true
                     };
 
                 case HealthDataType.BodyTemperature:
@@ -124,8 +132,8 @@ namespace Plugin.Health
                         TypeIdentifier = HKQuantityTypeIdentifier.BloodGlucose
                     };
 
+                
                 // IOS SPECIFIC
-
 
                 case HealthDataType.iOS_BodyMassIndex:
                     return new HealthKitData

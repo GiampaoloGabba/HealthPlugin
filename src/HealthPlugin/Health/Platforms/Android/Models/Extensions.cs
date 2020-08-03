@@ -55,7 +55,16 @@ namespace Plugin.Health
                         Unit           = Field.FieldWeight
                     };
 
-                case HealthDataType.Energy:
+                case HealthDataType.Calories:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier = DataType.TypeCaloriesExpended,
+                        AggregateType  = DataType.AggregateCaloriesExpended,
+                        Unit           = Field.FieldCalories,
+                        Cumulative     = true
+                    };
+
+                case HealthDataType.CaloriesActive:
                     return new GoogleFitData
                     {
                         TypeIdentifier = DataType.TypeCaloriesExpended,
@@ -81,21 +90,12 @@ namespace Plugin.Health
                         Unit           = Field.FieldPercentage
                     };
 
-                case HealthDataType.ActiveEnergyBurned:
-                    return new GoogleFitData
-                    {
-                        //TypeIdentifier = DataType, //TODO: quale datatype
-                        //AggregateType  = DataType, //TODO: quale datatype
-                        // Unit           = Field //TODO: quale unit?
-                    };
-
                 case HealthDataType.BodyTemperature:
                     return new GoogleFitData
                     {
                         TypeIdentifier = HealthDataTypes.TypeBodyTemperature,
                         AggregateType  = HealthDataTypes.AggregateBodyTemperatureSummary,
-                        Unit           = HealthFields.FieldBodyTemperature,
-                        Cumulative     = true
+                        Unit           = HealthFields.FieldBodyTemperature
                     };
 
                 case HealthDataType.BloodPressureSystolic:
@@ -138,6 +138,18 @@ namespace Plugin.Health
                         AggregateType  = HealthDataTypes.AggregateBloodGlucoseSummary,
                         Unit           = HealthFields.FieldBloodGlucoseLevel,
                     };
+
+
+                // ANDROID SPECIFIC
+
+                case HealthDataType.Droid_BasalMetabolicRate:
+                    return new GoogleFitData
+                    {
+                        TypeIdentifier = DataType.TypeBasalMetabolicRate,
+                        AggregateType  = DataType.AggregateBasalMetabolicRateSummary,
+                        Unit           = Field.FieldCalories,
+                    };
+
 
                 default:
                     throw new ArgumentOutOfRangeException();

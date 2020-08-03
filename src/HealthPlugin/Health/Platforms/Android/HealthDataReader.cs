@@ -7,8 +7,11 @@ using Android.Gms.Auth.Api.SignIn;
 using Android.Gms.Fitness;
 using Android.Gms.Fitness.Data;
 using Android.Gms.Fitness.Request;
+using Android.Gms.Fitness.Result;
 using Java.Util.Concurrent;
+using Org.Json;
 using Debug = System.Diagnostics.Debug;
+using Task = Android.Gms.Tasks.Task;
 
 namespace Plugin.Health
 {
@@ -23,6 +26,8 @@ namespace Plugin.Health
         //Esempi di utilizzo GoogleFit
         //aggregation: https://github.com/dariosalvi78/cordova-plugin-health/blob/master/src/android/HealthPlugin.java
         //datatypes: https://developers.google.com/android/reference/com/google/android/gms/fitness/data/DataType#TYPE_STEP_COUNT_DELTA
+
+        //TODO gestire calorie basali nel bucket time
 
         readonly Activity _currentActivity;
         readonly HealthService _healthService;
@@ -75,10 +80,6 @@ namespace Plugin.Health
                     case AggregateTime.Hour:
                         readBuilder.BucketByTime(1, TimeUnit.Hours);
                         break;
-
-                    case AggregateTime.Minute:
-                        readBuilder.BucketByTime(1, TimeUnit.Minutes);
-                        break;
                 }
             }
             else
@@ -91,6 +92,19 @@ namespace Plugin.Health
             var response = await FitnessClass.GetHistoryClient(_currentActivity, GoogleSignIn.GetLastSignedInAccount(_currentActivity))
                                              .ReadDataAsync(readRequest).ConfigureAwait(false);
 
+            double valueToSubstract = 0;
+            if (healthDataType == HealthDataType.CaloriesActive)
+            {
+                valueToSubstract = await GetBasalAvg(endDate);
+                var hourRange = (startDate - endDate).TotalHours;
+
+                // if the bucket is not daily, it needs to be normalised
+                if (aggregateTime == AggregateTime.Hour)
+                {
+                    valueToSubstract = (valueToSubstract / (24 * 60 * 60 * 1000)) * (endTime - startTime);
+                }
+            }
+
             if (response == null)
                 return new List<T>();
 
@@ -99,76 +113,131 @@ namespace Plugin.Health
                 var output = new List<T>();
                 foreach (var bucket in response.Buckets)
                 {
-                    foreach (var dataSet in bucket.DataSets)
-                    {
-                        output.AddRange((IEnumerable<T>) dataSet.DataPoints.Select(result =>
-                            CreateHealthData(result, fitData.Unit, fitData.Cumulative)));
-                    }
+                    var dataSet = bucket.GetDataSet(fitData.AggregateType);
+                    output.AddRange((IEnumerable<T>) dataSet.DataPoints.Select(result =>
+                        CreateAggregatedData(result, fitData, valueToSubstract)));
                 }
 
                 return output;
             }
+            if (aggregateTime != AggregateTime.None && healthDataType == HealthDataType.Droid_BasalMetabolicRate)
+            {
+                return new List<T>()
+                {
+                    new AggregatedHealthData()
+                    {
+                        StartDate = startDate,
+                        EndDate   = endDate,
+                        Sum       = valueToSubstract
+                    } as T
+                };
+            }
 
             return (IEnumerable<T>) response.GetDataSet(fitData.TypeIdentifier)?.DataPoints?
-                .Select(result => CreateHealthData(result, fitData.Unit, true)).ToList();
+                                             .Select(dataPoint => new HealthData
+                                             {
+                                                 StartDate   = dataPoint.GetStartTime(TimeUnit.Milliseconds).ToDateTime(),
+                                                 EndDate     = dataPoint.GetEndTime(TimeUnit.Milliseconds).ToDateTime(),
+                                                 Value       = ReadValue(dataPoint, fitData.Unit, valueToSubstract) ?? 0,
+                                                 UserEntered = dataPoint.OriginalDataSource?.StreamName == "user_input"
+                                             }).ToList();
         }
 
-        IHealthData CreateHealthData(DataPoint dataPoint, Field unit, bool cumulative)
+        // utility function that gets the basal metabolic rate averaged over a week
+        private async Task<double> GetBasalAvg(DateTime endDate)
         {
-            IHealthData hData;
+            float basalAvg = 0;
+            long startDate = endDate.AddDays(-7).ToJavaTimeStamp();
 
-            if (cumulative)
+            var readRequest = new DataReadRequest.Builder()
+                              .Aggregate(DataType.TypeBasalMetabolicRate, DataType.AggregateBasalMetabolicRateSummary)
+                              .BucketByTime(1, TimeUnit.Days)
+                              .SetTimeRange(startDate, endDate.ToJavaTimeStamp(), TimeUnit.Milliseconds).Build();
+
+            var response = await FitnessClass.GetHistoryClient(_currentActivity, GoogleSignIn.GetLastSignedInAccount(_currentActivity))
+                                             .ReadDataAsync(readRequest);
+
+            if (response.Status.IsSuccess)
             {
-                hData = new AggregatedHealthData
+                var avgsN = 0;
+                foreach (var bucket in response.Buckets)
                 {
-                    StartDate = dataPoint.GetStartTime(TimeUnit.Milliseconds).ToDateTime(),
-                    EndDate   = dataPoint.GetEndTime(TimeUnit.Milliseconds).ToDateTime(),
-                    Min       = ReadValue(dataPoint, Field.FieldMin),
-                    Max       = ReadValue(dataPoint, Field.FieldMax),
-                    Average   = ReadValue(dataPoint, Field.FieldAverage)
-                };
+                    // in the com.google.bmr.summary data type, each data point represents
+                    // the average, maximum and minimum basal metabolic rate, in kcal per day, over the time interval of the data point.
+                    var dataSet = bucket.GetDataSet(DataType.AggregateBasalMetabolicRateSummary);
+                    foreach (var dataPoint in dataSet.DataPoints)
+                    {
+                        var avg = dataPoint.GetValue(Field.FieldAverage).AsFloat();
+                        basalAvg += avg;
+                        avgsN++;
+                    }
+                }
+
+                // do the average of the averages
+                if (avgsN != 0) basalAvg /= avgsN; // this a daily average
+                return basalAvg;
+            }
+
+            throw new Exception(response.Status.StatusMessage);
+        }
+
+        AggregatedHealthData CreateAggregatedData(DataPoint dataPoint, GoogleFitData fitData, double valueToSubstract)
+        {
+            var hData = new AggregatedHealthData
+            {
+                StartDate = dataPoint.GetStartTime(TimeUnit.Milliseconds).ToDateTime(),
+                EndDate   = dataPoint.GetEndTime(TimeUnit.Milliseconds).ToDateTime(),
+            };
+
+            if (fitData.Cumulative)
+            {
+                hData.Sum = ReadValue(dataPoint, fitData.Unit, valueToSubstract);
             }
             else
             {
-                hData = new HealthData
-                {
-                    StartDate   = dataPoint.GetStartTime(TimeUnit.Milliseconds).ToDateTime(),
-                    EndDate     = dataPoint.GetEndTime(TimeUnit.Milliseconds).ToDateTime(),
-                    Value       = ReadValue(dataPoint, unit) ?? 0,
-                    UserEntered = dataPoint.OriginalDataSource?.StreamName == "user_input"
-                };
+                hData.Min = ReadValue(dataPoint, fitData.MinOverride ?? Field.FieldMin, valueToSubstract);
+                hData.Max = ReadValue(dataPoint, fitData.MaxOverride ?? Field.FieldMax, valueToSubstract);
+                hData.Average = ReadValue(dataPoint, fitData.AverageOverride ?? Field.FieldAverage, valueToSubstract);
             }
 
             return hData;
         }
 
-        double? ReadValue(DataPoint dataPoint, Field unit)
+        double? ReadValue(DataPoint dataPoint, Field unit, double valueToSubstract)
         {
+            double? output = 0;
             try
             {
                 //need to pass type of field
                 //return dataPoint.GetValue(Field.FieldAverage).AsFloat();
-                return dataPoint.GetValue(unit).AsFloat();
+                output = dataPoint.GetValue(unit).AsFloat();
             }
             catch
             {
                 try
                 {
-                    return dataPoint.GetValue(unit).AsInt();
+                    output = dataPoint.GetValue(unit).AsInt();
                 }
                 catch
                 {
                     try
                     {
-                        return dataPoint.GetValue(unit).AsString().ToDbl();
+                        output = dataPoint.GetValue(unit).AsString().ToDbl();
                     }
                     catch (Exception e3)
                     {
                         Debug.WriteLine(e3,"GoogleFit - Unable to convert datatype format");
-                        return null;
+                        output = null;
                     }
                 }
             }
+
+            if (output != null)
+            {
+                output = Math.Max(0, output.Value - valueToSubstract);
+            }
+
+            return output;
         }
     }
 }

@@ -9,6 +9,8 @@ namespace Plugin.Health
 {
     public class HealthDataReader : HealthDataReaderBase
     {
+        //TODO: gestire calorie totali
+
         readonly HealthService _healthService;
         readonly HKHealthStore _healthStore;
 
@@ -59,10 +61,6 @@ namespace Plugin.Health
                         break;
 
                     case AggregateTime.Hour:
-                        interval.Hour = 1;
-                        break;
-
-                    case AggregateTime.Minute:
                         interval.Hour = 1;
                         break;
                 }

@@ -7,8 +7,7 @@
         Month,
         Week,
         Day,
-        Hour,
-        Minute
+        Hour
     }
 
     [Preserve(AllMembers = true)]
@@ -19,10 +18,10 @@
         HeartRate,
         Height,
         Weight,
-        Energy,
+        Calories,
+        CaloriesActive,
         Water,
         BodyFat,
-        ActiveEnergyBurned,
         BodyTemperature,
         BloodPressureSystolic,
         BloodPressureDiastolic,
@@ -35,6 +34,8 @@
         iOS_BasalEnergyBurned,
         iOS_WaistCircumference,
         iOS_StandTime,
-        iOS_ExerciseTime
+        iOS_ExerciseTime,
+
+        Droid_BasalMetabolicRate
     }
 }
