@@ -5,7 +5,7 @@
 
         <AssemblyName>Plugin.Health</AssemblyName>
         <RootNamespace>Plugin.Health</RootNamespace>
-        <PackageId>Xamarin.Plugin.Health</PackageId>
+        <PackageId>Plugin.Health</PackageId>
 
         <Product>$(AssemblyName) ($(TargetFramework))</Product>
         <AssemblyVersion>1.0</AssemblyVersion>
