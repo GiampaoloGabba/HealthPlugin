@@ -96,13 +96,6 @@ namespace Plugin.Health
             if (healthDataType == HealthDataType.CaloriesActive)
             {
                 valueToSubstract = await GetBasalAvg(endDate);
-                var hourRange = (startDate - endDate).TotalHours;
-
-                // if the bucket is not daily, it needs to be normalised
-                if (aggregateTime == AggregateTime.Hour)
-                {
-                    valueToSubstract = (valueToSubstract / (24 * 60 * 60 * 1000)) * (endTime - startTime);
-                }
             }
 
             if (response == null)
@@ -116,21 +109,21 @@ namespace Plugin.Health
                     var dataSet = bucket.GetDataSet(fitData.AggregateType);
                     output.AddRange((IEnumerable<T>) dataSet.DataPoints.Select(result =>
                         CreateAggregatedData(result, fitData, valueToSubstract)));
+
+                    if (!dataSet.DataPoints.Any() && healthDataType == HealthDataType.Droid_BasalMetabolicRate)
+                    {
+                        output.Add(
+                            new AggregatedHealthData()
+                            {
+                                StartDate = bucket.GetStartTime(TimeUnit.Milliseconds).ToDateTime(),
+                                EndDate   = bucket.GetEndTime(TimeUnit.Milliseconds).ToDateTime(),
+                                Sum       = valueToSubstract
+                            } as T);
+                    }
+
                 }
 
                 return output;
-            }
-            if (aggregateTime != AggregateTime.None && healthDataType == HealthDataType.Droid_BasalMetabolicRate)
-            {
-                return new List<T>()
-                {
-                    new AggregatedHealthData()
-                    {
-                        StartDate = startDate,
-                        EndDate   = endDate,
-                        Sum       = valueToSubstract
-                    } as T
-                };
             }
 
             return (IEnumerable<T>) response.GetDataSet(fitData.TypeIdentifier)?.DataPoints?
@@ -168,8 +161,11 @@ namespace Plugin.Health
                     foreach (var dataPoint in dataSet.DataPoints)
                     {
                         var avg = dataPoint.GetValue(Field.FieldAverage).AsFloat();
-                        basalAvg += avg;
-                        avgsN++;
+                        if (avg > 0)
+                        {
+                            basalAvg += avg;
+                            avgsN++;
+                        }
                     }
                 }
 
