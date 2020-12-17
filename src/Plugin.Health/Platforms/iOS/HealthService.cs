@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 using Foundation;
 using HealthKit;
 
+
 namespace Plugin.Health
 {
     [Preserve(AllMembers = true)]
     public class HealthService : HealthServiceBase
     {
         //https://github.com/EddyVerbruggen/HealthKit
-        
+
         //TODO: esplorare store e delete
         //TODO: esplorare attività
         //TODO: esplorare sessioni
@@ -44,17 +45,24 @@ namespace Plugin.Health
             }
         }
 
-        public override async Task<bool> RequestPermissionAsync(params HealthDataType[] dataTypes)
+        public override async Task<bool> RequestPermissionAsync(HealthDataType[] writeDataTypes, HealthDataType[] readDataTypes)
         {
 
             if (HealthStore == null)
                 throw new NotSupportedException("HEALTHKIT is not available on this device!");
 
-            var result = dataTypes.Where(IsDataTypeAvailable).ToArray();
 
-            if (HKHealthStore.IsHealthDataAvailable && result.Any())
+            if(writeDataTypes.Where(t => t.ToHealthKit().HKType == HealthKitData.HKTypes.Characteristic).Any())
             {
-                var (res, error) = await HealthStore.RequestAuthorizationToShareAsync(null, DataTypesToRead(result)).ConfigureAwait(false);
+                throw new NotSupportedException("Characteristics cannot be written!");
+            }
+
+            var readPermissions = readDataTypes.Where(IsDataTypeAvailable).ToArray();
+            var writePermissions = writeDataTypes.Where(IsDataTypeAvailable).ToArray();
+
+            if (HKHealthStore.IsHealthDataAvailable && readPermissions.Any())
+            {
+                var (res, error) = await HealthStore.RequestAuthorizationToShareAsync(DataTypesToPermissions(writePermissions), DataTypesToPermissions(readPermissions)).ConfigureAwait(false);
 
                 if (error != null)
                     throw new Exception($"HEALTHKIT - Error during Permission request: {error.LocalizedDescription}");
@@ -69,6 +77,11 @@ namespace Plugin.Health
             return new HealthDataReader(this);
         }
 
+        public override IHealthDataWriter DataWriter()
+        {
+            return new HealthDataWriter(this);
+        }
+
         public override void PromptInstallGoogleFit()
         {
             //Do nothing
@@ -76,13 +89,17 @@ namespace Plugin.Health
             //throw new NotImplementedException();
         }
 
-        NSSet DataTypesToRead(HealthDataType[] dataTypes)
+        NSSet DataTypesToPermissions(HealthDataType[] dataTypes)
         {
             var types = new HKObjectType[dataTypes.Length];
+
             for (var i = 0; i < dataTypes.Length; i++)
             {
-                types.SetValue(HKQuantityType.Create(dataTypes[i].ToHealthKit().TypeIdentifier), i);
+                var dataType = dataTypes[i].ToHealthKit();
+
+                types.SetValue(dataType.Permission, i);
             }
+
             return NSSet.MakeNSObjectSet(types);
         }
     }

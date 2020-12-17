@@ -42,7 +42,7 @@ namespace Plugin.Health
                                                                AggregateTime aggregateTime,
                                                                DateTime startDate, DateTime endDate)
         {
-            var authorized = _healthService.HasOAuthPermission(_healthService.GetFitnessOptions(healthDataType));
+            var authorized = _healthService.HasOAuthPermission(_healthService.FitnessReadOptions(new HealthDataType[] { healthDataType }));
 
             if (!authorized)
                 throw new UnauthorizedAccessException($"Not enough permissions to request {healthDataType}");

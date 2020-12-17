@@ -1,5 +1,12 @@
 ﻿namespace Plugin.Health
 {
+    public enum Permissions
+    {
+        Read,
+        Write,
+        Both
+    }
+
     public enum AggregateTime
     {
         None,
@@ -36,6 +43,12 @@
         iOS_StandTime,
         iOS_ExerciseTime,
 
-        Droid_BasalMetabolicRate
+        Droid_BasalMetabolicRate,
+        MindfulSession,
+        RespiratoryRate,
+        Workouts,
+        DateOfBirth,
+        BiologicalSex
+
     }
 }

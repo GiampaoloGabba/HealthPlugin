@@ -34,7 +34,7 @@ namespace Plugin.Health
 
             var taskComplSrc = new TaskCompletionSource<IEnumerable<T>>();
             var healthKitType = healthDataType.ToHealthKit();
-            var quantityType = HKQuantityType.Create(healthKitType.TypeIdentifier);
+            var quantityType = HKQuantityType.Create(healthKitType.QuantityTypeIdentifier);
             var predicate = HKQuery.GetPredicateForSamples((NSDate) startDate, (NSDate) endDate, HKQueryOptions.StrictStartDate);
 
             if (aggregateTime != AggregateTime.None)
@@ -116,7 +116,7 @@ namespace Plugin.Health
             else
             {
                 var sortDescriptor = new[] {new NSSortDescriptor(HKSample.SortIdentifierEndDate, true)};
-                var query = new HKSampleQuery(HKQuantityType.Create(healthKitType.TypeIdentifier), predicate,
+                var query = new HKSampleQuery(HKQuantityType.Create(healthKitType.QuantityTypeIdentifier), predicate,
                     HKSampleQuery.NoLimit, sortDescriptor,
                     (resultQuery, results, error) =>
                     {
