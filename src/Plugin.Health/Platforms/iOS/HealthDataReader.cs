@@ -116,7 +116,22 @@ namespace Plugin.Health
             else
             {
                 var sortDescriptor = new[] {new NSSortDescriptor(HKSample.SortIdentifierEndDate, true)};
-                var query = new HKSampleQuery(HKQuantityType.Create(healthKitType.QuantityTypeIdentifier), predicate,
+
+
+                HKSampleType sampleType;
+
+                if(healthKitType.HKType == HealthKitData.HKTypes.Category)
+                {
+                    sampleType = HKCategoryType.Create(healthKitType.CategoryTypeIdentifier);
+                } else if(healthKitType.HKType == HealthKitData.HKTypes.Quantity)
+                {
+                    sampleType = HKQuantityType.Create(healthKitType.QuantityTypeIdentifier);
+                } else
+                {
+                    throw new NotSupportedException();
+                }
+
+                var query = new HKSampleQuery(sampleType, predicate,
                     HKSampleQuery.NoLimit, sortDescriptor,
                     (resultQuery, results, error) =>
                     {

@@ -24,12 +24,13 @@ namespace Plugin.Health
                 end = start;
             }
 
+            var v = (nint)value;
             var healthKit = healthDataType.ToHealthKit();
 
             if (healthKit.HKType == HKTypes.Category)
             {
                 var type = HKCategoryType.Create(healthDataType.ToHealthKit().CategoryTypeIdentifier);
-                var sample = HKCategorySample.FromType(type, (nint)value, (NSDate)end, (NSDate)start);
+                var sample = HKCategorySample.FromType(type, (nint)value, (NSDate)start, (NSDate)end);
 
                 var (success, error) = await _healthStore.SaveObjectAsync(sample).ConfigureAwait(false);
 
@@ -41,7 +42,7 @@ namespace Plugin.Health
 
                 var type = HKQuantityType.Create(healthDataType.ToHealthKit().QuantityTypeIdentifier);
                 var quantity = HKQuantity.FromQuantity(healthDataType.ToHealthKit().Unit, value);
-                var sample = HKQuantitySample.FromType(type, quantity, (NSDate)end, (NSDate)start);
+                var sample = HKQuantitySample.FromType(type, quantity, (NSDate)start, (NSDate)end);
 
                 var (success, error) = await _healthStore.SaveObjectAsync(sample).ConfigureAwait(false);
 
@@ -76,6 +77,11 @@ namespace Plugin.Health
         public async Task<bool> SaveStep(int value, DateTime start, DateTime? end)
         {
             return await WriteAsync(HealthDataType.StepCount, value, start, end);
+        }
+
+        public async Task<bool> SaveSleepAnalysis(HKCategoryValueSleepAnalysis value, DateTime start, DateTime end)
+        {
+            return await WriteAsync(HealthDataType.SleepAnalysis, (int)value, start, end);
         }
     }
 }

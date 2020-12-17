@@ -186,6 +186,11 @@ namespace Plugin.Health
                     {
                     };
 
+                case HealthDataType.SleepAnalysis:
+                    return new HealthKitData(HKCategoryTypeIdentifier.SleepAnalysis)
+                    {
+                    };
+
                 case HealthDataType.Workouts:
                     
                     return new HealthKitData(HKObjectType.GetWorkoutType())

@@ -54,7 +54,7 @@ namespace Plugin.Health
 
             if(writeDataTypes.Where(t => t.ToHealthKit().HKType == HealthKitData.HKTypes.Characteristic).Any())
             {
-                throw new NotSupportedException("Characteristics cannot be written!");
+                throw new NotSupportedException($"Characteristics cannot be written!");
             }
 
             var readPermissions = readDataTypes.Where(IsDataTypeAvailable).ToArray();

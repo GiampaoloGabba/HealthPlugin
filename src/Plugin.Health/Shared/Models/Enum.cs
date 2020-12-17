@@ -48,7 +48,7 @@
         RespiratoryRate,
         Workouts,
         DateOfBirth,
-        BiologicalSex
-
+        BiologicalSex,
+        SleepAnalysis
     }
 }
