@@ -24,7 +24,6 @@ namespace Plugin.Health
                 end = start;
             }
 
-            var v = (nint)value;
             var healthKit = healthDataType.ToHealthKit();
 
             if (healthKit.HKType == HKTypes.Category)
@@ -54,6 +53,7 @@ namespace Plugin.Health
             }
         }
 
+        /*
         public async Task<bool> SaveBmi(double value, DateTime start, DateTime? end)
         {
             return await WriteAsync(HealthDataType.iOS_BodyMassIndex, value, start, end);
@@ -82,6 +82,43 @@ namespace Plugin.Health
         public async Task<bool> SaveSleepAnalysis(HKCategoryValueSleepAnalysis value, DateTime start, DateTime end)
         {
             return await WriteAsync(HealthDataType.SleepAnalysis, (int)value, start, end);
+        }
+        */
+
+        public override async Task<bool> WriteAsync(WorkoutDataType workoutDataType, double calories, DateTime start, DateTime? end = null, string name = null)
+        {
+            var totalEnergyBurned = HKQuantity.FromQuantity(HKUnit.CreateJouleUnit(HKMetricPrefix.Kilo), 20);
+
+            var metadata = new HKMetadata();
+
+            if (name != null)
+            {
+                metadata.WorkoutBrandName = name;
+            }
+
+            var workout = HKWorkout.Create(Convert(workoutDataType), (NSDate)start, (NSDate)end, new HKWorkoutEvent[] { }, totalEnergyBurned, null, metadata);
+
+
+            var (success, error) = await _healthStore.SaveObjectAsync(workout);
+
+            return success;
+        }
+
+        private HKWorkoutActivityType Convert(WorkoutDataType workoutDataType)
+        {
+            return workoutDataType switch
+            {
+                WorkoutDataType.Biking => HKWorkoutActivityType.Cycling,
+                WorkoutDataType.Running => HKWorkoutActivityType.Running,
+                WorkoutDataType.Yoga => HKWorkoutActivityType.Yoga,
+                WorkoutDataType.FunctionalStrengthTraining => HKWorkoutActivityType.FunctionalStrengthTraining,
+                WorkoutDataType.TraditionalStrengthTraining => HKWorkoutActivityType.TraditionalStrengthTraining,
+                WorkoutDataType.CoreTraining => HKWorkoutActivityType.CoreTraining,
+                WorkoutDataType.Flexibility => HKWorkoutActivityType.Flexibility,
+                WorkoutDataType.HighIntensityIntervalTraining => HKWorkoutActivityType.HighIntensityIntervalTraining,
+                WorkoutDataType.MindAndBody => HKWorkoutActivityType.MindAndBody,
+                _ => throw new NotSupportedException(),
+            };
         }
     }
 }

@@ -126,7 +126,11 @@ namespace Plugin.Health
                 } else if(healthKitType.HKType == HealthKitData.HKTypes.Quantity)
                 {
                     sampleType = HKQuantityType.Create(healthKitType.QuantityTypeIdentifier);
-                } else
+                } else if(healthKitType.HKType == HealthKitData.HKTypes.Workout)
+                {
+                    sampleType = HKSampleType.GetWorkoutType();
+                }
+                else
                 {
                     throw new NotSupportedException();
                 }
@@ -135,13 +139,40 @@ namespace Plugin.Health
                     HKSampleQuery.NoLimit, sortDescriptor,
                     (resultQuery, results, error) =>
                     {
-                        var healthData = results?.Select(result => new HealthData
+
+                        IEnumerable<T> healthData = default(IEnumerable<T>);
+
+                        if (sampleType == HKSampleType.GetWorkoutType())
                         {
-                            StartDate   = (DateTime) result.StartDate,
-                            EndDate     = (DateTime) result.EndDate,
-                            Value       = ReadValue(result, healthKitType.Unit),
-                            UserEntered = result.Metadata?.WasUserEntered ?? false
-                        } as T);
+                            healthData = results?.Select(result => new WorkoutData
+                            {
+                                StartDate = (DateTime)result.StartDate,
+                                EndDate = (DateTime)result.EndDate,
+                                Duration = (result as HKWorkout).Duration,
+                                Device = (result as HKWorkout).Device?.ToString(),
+                                WorkoutType = (result as HKWorkout).WorkoutDataType()
+                                //TotalDistance = Convert.ToDouble((result as HKWorkout).TotalDistance),
+                                //TotalEnergyBurned = Convert.ToDouble((result as HKWorkout).TotalEnergyBurned)
+
+
+                            } as T); 
+                        }
+                        else
+                        {
+                            healthData = results?.Select(result => new HealthData
+                            {
+
+
+                                StartDate = (DateTime)result.StartDate,
+                                EndDate = (DateTime)result.EndDate,
+                                Value = ReadValue(result, healthKitType.Unit),
+                                UserEntered = result.Metadata?.WasUserEntered ?? false,
+
+                            } as T);
+
+                        }
+
+                       
 
                         taskComplSrc.SetResult(healthData);
                     });

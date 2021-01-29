@@ -15,6 +15,24 @@ namespace Plugin.Health
         //TODO: come gestire active+basal per calorie?
         //TODO: HKQuantityTypeIdentifierActiveEnergyBurned + HKQuantityTypeIdentifierBasalEnergyBurned
 
+
+        internal static WorkoutDataType WorkoutDataType(this HKWorkout hKWorkout)
+        {
+            return hKWorkout.WorkoutActivityType switch
+            {
+                HKWorkoutActivityType.Flexibility => Health.WorkoutDataType.Flexibility,
+                HKWorkoutActivityType.Cycling => Health.WorkoutDataType.Biking,
+                HKWorkoutActivityType.MindAndBody => Health.WorkoutDataType.MindAndBody,
+                HKWorkoutActivityType.FunctionalStrengthTraining => Health.WorkoutDataType.FunctionalStrengthTraining,
+                HKWorkoutActivityType.TraditionalStrengthTraining => Health.WorkoutDataType.TraditionalStrengthTraining,
+                HKWorkoutActivityType.Yoga => Health.WorkoutDataType.Yoga,
+                HKWorkoutActivityType.Running => Health.WorkoutDataType.Running,
+                HKWorkoutActivityType.CoreTraining => Health.WorkoutDataType.CoreTraining,
+                HKWorkoutActivityType.Other => Health.WorkoutDataType.Other,
+                _ => throw new NotSupportedException(),
+            };
+        }
+
         internal static HealthKitData ToHealthKit(this HealthDataType healthDataType)
         {
             switch (healthDataType)

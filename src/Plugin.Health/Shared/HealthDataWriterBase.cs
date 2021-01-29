@@ -5,9 +5,7 @@ namespace Plugin.Health
 {
     public abstract class HealthDataWriterBase : IHealthDataWriter
     {
-        public virtual Task<bool> WriteAsync(HealthDataType healthDataType, double value, DateTime start, DateTime? end)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract Task<bool> WriteAsync(HealthDataType healthDataType, double value, DateTime start, DateTime? end);
+        public abstract Task<bool> WriteAsync(WorkoutDataType workoutDataType, double calories, DateTime start, DateTime? end = null, string name = null);
     }
 }

@@ -59,6 +59,7 @@ namespace Plugin.Health
 
             var readPermissions = readDataTypes.Where(IsDataTypeAvailable).ToArray();
             var writePermissions = writeDataTypes.Where(IsDataTypeAvailable).ToArray();
+            
 
             if (HKHealthStore.IsHealthDataAvailable && readPermissions.Any())
             {
