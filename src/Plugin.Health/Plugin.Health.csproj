@@ -87,6 +87,21 @@
         <Compile Update="Platforms\Android\HealthDataReader.cs">
           <SubType>Code</SubType>
         </Compile>
+        <Compile Include="Shared\IHealthDataWriter.cs">
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Platforms\iOS\HealthDataWriter.cs">
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Platforms\iOS\Models\PermissionRequest.cs">
+          <SubType>Code</SubType>
+        </Compile>        
+        <Compile Update="Platforms\Android\Models\PermissionRequest.cs">
+          <SubType>Code</SubType>
+        </Compile>    
+        <Compile Include="Shared\HealthDataWriterBase.cs">
+          <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">

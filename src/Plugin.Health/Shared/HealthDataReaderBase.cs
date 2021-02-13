@@ -42,5 +42,11 @@ namespace Plugin.Health
         protected abstract Task<IEnumerable<T>> Query<T>(HealthDataType dataTypes,
                                                                    AggregateTime aggregateTime,
                                                                    DateTime startDate, DateTime endDate) where T: class, IHealthData;
+
+
+        public Task<IEnumerable<WorkoutData>> ReadWorkouts()
+        {
+            return FetchData<WorkoutData>(AggregateTime.None, new HealthDataType[] { HealthDataType.Workouts })?.FirstOrDefault().Value;
+        }
     }
 }

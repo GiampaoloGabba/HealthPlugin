@@ -20,6 +20,11 @@ namespace Plugin.Health
         IReadOnlyDictionary<HealthDataType, Task<IEnumerable<HealthData>>> Read(params HealthDataType[] healthDataType);
 
         /// <summary>
+        /// Fetch data from HealthKit/Google fit
+        /// </summary>
+        Task<IEnumerable<WorkoutData>> ReadWorkouts();
+
+        /// <summary>
         /// Fetch aggregated data from HealthKit/Google fit
         /// </summary>
         IReadOnlyDictionary<HealthDataType, Task<IEnumerable<AggregatedHealthData>>> ReadAggregate(AggregateTime aggregateTime, params HealthDataType[] healthDataType);

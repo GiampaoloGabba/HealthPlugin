@@ -22,13 +22,19 @@ namespace Plugin.Health
         /// </summary>
         /// <param name="dataTypes">HealthDataTypes to check</param>
         /// <returns></returns>
-        Task<bool> RequestPermissionAsync(params HealthDataType[] dataTypes);
+        Task<bool> RequestPermissionAsync(HealthDataType[] writeDataTypes, HealthDataType[] readDataTypes);
 
         /// <summary>
         /// Instantiate the DataReader for HealthKit/GoogleFit
         /// </summary>
         /// <returns></returns>
         IHealthDataReader DataReader();
+
+        /// <summary>
+        /// Instantiate the DataReader for HealthKit/GoogleFit
+        /// </summary>
+        /// <returns></returns>
+        IHealthDataWriter DataWriter();
 
         //Platforms
         void PromptInstallGoogleFit();

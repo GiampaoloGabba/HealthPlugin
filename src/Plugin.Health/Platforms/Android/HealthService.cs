@@ -80,9 +80,9 @@ namespace Plugin.Health
             }
         }
 
-        public override Task<bool> RequestPermissionAsync(params HealthDataType[] dataTypes)
+        public override Task<bool> RequestPermissionAsync(HealthDataType[] writeDataTypes, HealthDataType[] readDataTypes)
         {
-            var fitnessOptions = GetFitnessOptions(dataTypes);
+            var fitnessOptions = FitnessPermissionOptions(writeDataTypes, readDataTypes);
 
             _tcsAuth = new TaskCompletionSource<bool>();
 
@@ -109,13 +109,31 @@ namespace Plugin.Health
             return GoogleSignIn.HasPermissions(GoogleSignIn.GetLastSignedInAccount(_currentContext), fitnessOptions);
         }
 
-        internal FitnessOptions GetFitnessOptions(params HealthDataType[] dataTypes)
+        internal FitnessOptions FitnessPermissionOptions(HealthDataType[] writeDataTypes, HealthDataType[] readDataTypes)
         {
             var fitnessBuilder = FitnessOptions.InvokeBuilder();
-            foreach (var dataType in dataTypes)
+            foreach (var dataType in writeDataTypes)
+            {
+                fitnessBuilder.AddDataType(dataType.ToGoogleFit().TypeIdentifier, FitnessOptions.AccessWrite);
+            }
+
+            foreach (var dataType in readDataTypes)
             {
                 fitnessBuilder.AddDataType(dataType.ToGoogleFit().TypeIdentifier, FitnessOptions.AccessRead);
             }
+
+            return fitnessBuilder.Build();
+        }
+
+        internal FitnessOptions FitnessReadOptions(HealthDataType[] readDataTypes)
+        {
+            var fitnessBuilder = FitnessOptions.InvokeBuilder();
+
+            foreach (var dataType in readDataTypes)
+            {
+                fitnessBuilder.AddDataType(dataType.ToGoogleFit().TypeIdentifier, FitnessOptions.AccessRead);
+            }
+
             return fitnessBuilder.Build();
         }
 
@@ -127,6 +145,11 @@ namespace Plugin.Health
         public static void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             _tcsAuth.TrySetResult(requestCode == REQUEST_CODE && resultCode == Result.Ok);
+        }
+
+        public override IHealthDataWriter DataWriter()
+        {
+            throw new NotImplementedException();
         }
     }
 }
